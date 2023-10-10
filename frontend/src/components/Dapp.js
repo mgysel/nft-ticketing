@@ -6,6 +6,8 @@ import { ethers } from "ethers";
 // We import the contract's artifacts and address here, as we are going to be
 // using them with ethers
 import TokenArtifact from "../contracts/Token.json";
+import EventArtifact from "../contracts/Event.json";
+import EventCreatorArtifact from "../contracts/EventCreator.json";
 import contractAddress from "../contracts/contract-address.json";
 
 // All the logic of this dapp is contained in the Dapp component.
@@ -18,6 +20,37 @@ import { Transfer } from "./Transfer";
 import { TransactionErrorMessage } from "./TransactionErrorMessage";
 import { WaitingForTransactionMessage } from "./WaitingForTransactionMessage";
 import { NoTokensMessage } from "./NoTokensMessage";
+import { Landing } from "./Landing";
+
+import {
+  Heading,
+  Flex,
+  Center,
+  Wrap,
+  WrapItem,
+  Button,
+  Text,
+  Form,
+  FormControl,
+  FormLabel,
+  FormErrorMessage,
+  FormHelperText,
+  IconButton,
+  Icon,
+  Input,
+  InputGroup,
+  SimpleGrid,
+  Box,
+  VStack,
+  Stack,
+  Radio,
+  RadioGroup,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel
+} from "@chakra-ui/react";
 
 // This is the default id used by the Hardhat Network
 const HARDHAT_NETWORK_ID = '31337';
@@ -51,6 +84,20 @@ export class Dapp extends React.Component {
       txBeingSent: undefined,
       transactionError: undefined,
       networkError: undefined,
+      // Create Event Form
+      formEventName: "",
+      formEventSymbol: "",
+      formNumTickets: 0,
+      formPrice: 0,
+      formCanBeResold: true,
+      formRoyaltyPercent: 0,
+      // Styling
+      darkGreen: "#276749",
+      lightGreen: "#C6F6DF",
+      // Events
+      myEvents: [],
+      eventStage: 0,
+
     };
 
     this.state = this.initialState;
@@ -89,71 +136,226 @@ export class Dapp extends React.Component {
     // If everything is loaded, we render the application.
     return (
       <div className="container p-4">
-        <div className="row">
-          <div className="col-12">
-            <h1>
-              {this.state.tokenData.name} ({this.state.tokenData.symbol})
-            </h1>
-            <p>
-              Welcome <b>{this.state.selectedAddress}</b>, you have{" "}
-              <b>
-                {this.state.balance.toString()} {this.state.tokenData.symbol}
-              </b>
-              .
-            </p>
-          </div>
-        </div>
-
-        <hr />
-
-        <div className="row">
-          <div className="col-12">
-            {/* 
-              Sending a transaction isn't an immediate action. You have to wait
-              for it to be mined.
-              If we are waiting for one, we show a message here.
-            */}
-            {this.state.txBeingSent && (
-              <WaitingForTransactionMessage txHash={this.state.txBeingSent} />
-            )}
-
-            {/* 
-              Sending a transaction can fail in multiple ways. 
-              If that happened, we show a message here.
-            */}
-            {this.state.transactionError && (
-              <TransactionErrorMessage
-                message={this._getRpcErrorMessage(this.state.transactionError)}
-                dismiss={() => this._dismissTransactionError()}
-              />
-            )}
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="col-12">
-            {/*
-              If the user has no tokens, we don't show the Transfer form
-            */}
-            {this.state.balance.eq(0) && (
-              <NoTokensMessage selectedAddress={this.state.selectedAddress} />
-            )}
-
-            {/*
-              This component displays a form that the user can use to send a 
-              transaction and transfer some tokens.
-              The component doesn't have logic, it just calls the transferTokens
-              callback.
-            */}
-            {this.state.balance.gt(0) && (
-              <Transfer
-                transferTokens={(to, amount) =>
-                  this._transferTokens(to, amount)
-                }
-                tokenSymbol={this.state.tokenData.symbol}
-              />
-            )}
-          </div>
+        <div>
+          <Flex w="90%" my="20px" 
+            ml="5%"
+            mr="5%"
+            direction="column"
+          >
+            <nav className="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+              <Heading ml={20} color="white">
+                TicketChain
+              </Heading>
+              <VStack spacing={2} alignItems="right">
+                <Box className="navbar-brand pb-0 mb-0" justify="right">
+                  Account: {this.state.selectedAddress.toString()}
+                </Box>
+                <Box className="navbar-brand pt-0 mt-0" justify="right">
+                  Balance: {this.state.balance.toString()}
+                </Box>
+              </VStack>
+            </nav>
+            <Tabs 
+              mt="100px"
+              p="20px"
+              variant="soft-rounded"
+              colorScheme="green"
+              borderRadius="5px"
+              border="1px solid"
+              borderColor="gray.200"
+            >
+              <TabList>
+                  <Tab>
+                    Create Events
+                  </Tab>
+                  <Tab>
+                    My Events
+                  </Tab>
+                </TabList>
+                <TabPanels>
+                <TabPanel mt="15px" mb="15px" align="center">
+                  <Stack width="600px" align="center" justify="center">
+                    <Heading mb="25px">Create an Event Now</Heading>
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault()
+                          this._createEvent(
+                            this.state.formNumTickets, 
+                            this.state.formPrice, 
+                            this.state.formCanBeResold, 
+                            this.state.formRoyaltyPercent, 
+                            this.state.formEventName, 
+                            this.state.formEventSymbol
+                          )
+                        }}
+                      >
+                        <Input
+                          isRequired
+                          id='name'
+                          type='text'
+                          size="md"
+                          placeholder='Event name'
+                          onChange={(e) => this.setState({ formEventName: e.target.value })}
+                          mb="10px"
+                          _placeholder={{ color: 'gray.500' }}
+                          w="450px"
+                        />
+                        <Input
+                          isRequired
+                          id='symbol'
+                          type='text'
+                          size="md"
+                          placeholder='Token symbol'
+                          onChange={(e) => this.setState({ formEventSymbol: e.target.value })}
+                          mb="10px"
+                          _placeholder={{ color: 'gray.500' }}
+                          w="450px"
+                        />
+                        <Input
+                          isRequired
+                          id='numTickets'
+                          type='number'
+                          size="md"
+                          placeholder='Number of Tickets'
+                          onChange={(e) => this.setState({ formNumTickets: e.target.value })}
+                          mb="10px"
+                          _placeholder={{ color: 'gray.500' }}
+                          w="450px"
+                        />
+                        <Input
+                          isRequired
+                          id='price'
+                          type='number'
+                          size="md"
+                          placeholder='Price'
+                          onChange={(e) => this.setState({ formEventPrice: e.target.value })}
+                          mb="10px"
+                          _placeholder={{ color: 'gray.500' }}
+                          w="450px"
+                        />
+                        <RadioGroup 
+                          mb="10px"
+                          _placeholder={{ color: 'gray.500' }}
+                          w="450px"
+                          h="40px"
+                          onChange={(e) => this.setState({ formCanBeResold: e.target.value })}
+                          value={this.state.formCanBeResold}
+                          border="1px"
+                          borderRadius="5px"
+                          borderColor='gray.200'
+                          textAlign=""
+                        >
+                          <Stack spacing={4} direction="row">
+                            <FormLabel 
+                              color='gray.500' 
+                              verticalAlign='middle'
+                              ml="15px"
+                              mt="6px"
+                            >
+                              Can tickets be resold?
+                            </FormLabel>
+                            <Radio value={true}>Yes</Radio>
+                            <Radio value={false}>No</Radio>
+                          </Stack>
+                        </RadioGroup>
+                        <Input
+                          isRequired
+                          id='royaltyPercent'
+                          type='number'
+                          size="md"
+                          placeholder='Resale royalty (%)'
+                          onChange={(e) => this.setState({ formRoyaltyPercent: e.target.value })}
+                          mb="10px"
+                          _placeholder={{ color: 'gray.500' }}
+                          w="450px"
+                        />
+                      <Button 
+                        type='submit' 
+                        color={this.state.darkGreen}
+                        backgroundColor={this.state.lightGreen}
+                        size="lg"
+                        mt="10px"
+                      >
+                          CREATE EVENT
+                      </Button>
+                    </form>
+                  </Stack>
+                </TabPanel>
+                <TabPanel mt="15px" mb="15px" align="center">
+                  <Heading mb="25px">My Events</Heading>
+                  <SimpleGrid columns={4} spacing={10} mt="30px">
+                    { 
+                      this.state.events.map((event, index) => (
+                        <Box 
+                          key={index} 
+                          borderRadius="5px"
+                          border="1px solid"
+                          borderColor="gray.200"
+                          p="20px" 
+                          width="20rem"
+                        >
+                          <Text isTruncated fontWeight="bold" fontSize="xl" mb="7px"> Event {index + 1}</Text>
+                          <Text>Event: {event.name}</Text>
+                          <Text>Balance: {event.ownerBalance}</Text>
+                          <Text>Number of Tickets Left: {event.numTicketsLeft}</Text>
+                          <Box                       
+                            borderRadius="5px"
+                            border="1px solid"
+                            borderColor="gray.100"
+                            padding="10px"
+                            mt="10px"
+                          >
+                            <RadioGroup 
+                              mb="10px"
+                              onChange={(e) => {
+                                event.stage = e;
+                                this.setState({eventStage: e});
+                              }} 
+                              value={event.stage.toString() == this.state.eventStage ? this.state.eventStage : event.stage.toString()}
+                              defaultValue={event.stage.toString()}
+                            >
+                              <Stack spacing={4} direction="column">
+                                <Radio value="0" mb="0">Prep</Radio>
+                                <Radio value="1">Active</Radio>
+                                <Radio value="2">Paused</Radio>
+                                <Radio value="3">Checkin Open</Radio>
+                                <Radio value="4">Cancelled</Radio>
+                                <Radio value="5">Closed</Radio>
+                              </Stack>
+                            </RadioGroup>
+                            <Button 
+                              type='submit' 
+                              color={this.state.darkGreen}
+                              backgroundColor={this.state.lightGreen}
+                              size="lg"
+                              mt="10px"
+                              width="210px"
+                              onClick={(e) => {
+                                e.preventDefault()
+                                this._setEventStage(index)
+                              }}
+                            >
+                              Set Event Stage
+                            </Button>
+                          </Box>
+                          <Button 
+                              type='submit' 
+                              color={this.state.darkGreen}
+                              backgroundColor={this.state.lightGreen}
+                              size="lg"
+                              mt="10px"
+                              width="210px"
+                            >
+                              Owner Withdraw
+                            </Button>
+                        </Box>
+                      ))
+                    }
+                  </SimpleGrid>
+              </TabPanel>
+              </TabPanels>
+            </Tabs>
+          </Flex>
         </div>
       </div>
     );
@@ -211,6 +413,8 @@ export class Dapp extends React.Component {
     this._initializeEthers();
     this._getTokenData();
     this._startPollingData();
+    console.log("GETTING EVENT DATA")
+    this._getEventsData();
   }
 
   async _initializeEthers() {
@@ -219,9 +423,29 @@ export class Dapp extends React.Component {
 
     // Then, we initialize the contract using that provider and the token's
     // artifact. You can do this same thing with your contracts.
+    console.log("*** Ethers Contract");
+    console.log("contractAddress.Token: ", contractAddress.Token)
     this._token = new ethers.Contract(
       contractAddress.Token,
       TokenArtifact.abi,
+      this._provider.getSigner(0)
+    );
+    console.log("this._token: ", this._token);
+
+    // Initialize the Event Creator contract
+    console.log("contactAddress.EventCreator: ", contractAddress.EventCreator)
+    this._eventCreator = new ethers.Contract(
+      // TODO: How to get Event Creator address
+      contractAddress.EventCreator,
+      EventCreatorArtifact.abi,
+      this._provider.getSigner(0)
+    );
+    console.log("this._eventCreator: ", this._eventCreator);
+
+    // Initialize the Event contract
+    this._event = new ethers.Contract(
+      contractAddress.Event,
+      EventArtifact.abi,
       this._provider.getSigner(0)
     );
   }
@@ -359,4 +583,164 @@ export class Dapp extends React.Component {
       this._switchChain();
     }
   }
+
+  async _getEventsData() {
+    console.log("*** Inside _getEventsData");
+    const events = await this._eventCreator.getEvents();
+    
+    const eventsData = [];
+    for (let i=0; i < events.length; i++) {
+      // Upload event contract
+      const thisEvent = new ethers.Contract(
+        events[0],
+        EventArtifact.abi,
+        this._provider.getSigner(0)
+      );
+      // Get event data
+      let owner = await thisEvent.owner();
+      let thisEventData = {
+        "owner": owner,
+        "ownerBalance": (await thisEvent.balances(owner)).toNumber(),
+        "name": await thisEvent.name(),
+        "symbol": await thisEvent.symbol(),
+        "numTicketsLeft": (await thisEvent.numTicketsLeft()).toNumber(),
+        "price": (await thisEvent.price()).toNumber(),
+        "canBeResold": await thisEvent.canBeResold(),
+        "royaltyPercent": (await thisEvent.royaltyPercent()).toNumber(),
+        "stage": await thisEvent.stage(),
+      }
+      eventsData.push(thisEventData);
+    }
+
+    this.setState({events: eventsData});
+  }
+
+  // This method sends an ethereum transaction to transfer tokens.
+  // While this action is specific to this application, it illustrates how to
+  // send a transaction.
+  async _createEvent(numTickets, price, canBeResold, royaltyPercent, name, symbol) {
+    // Sending a transaction is a complex operation:
+    //   - The user can reject it
+    //   - It can fail before reaching the ethereum network (i.e. if the user
+    //     doesn't have ETH for paying for the tx's gas)
+    //   - It has to be mined, so it isn't immediately confirmed.
+    //     Note that some testing networks, like Hardhat Network, do mine
+    //     transactions immediately, but your dapp should be prepared for
+    //     other networks.
+    //   - It can fail once mined.
+    //
+    // This method handles all of those things, so keep reading to learn how to
+    // do it.
+
+    try {
+      // If a transaction fails, we save that error in the component's state.
+      // We only save one such error, so before sending a second transaction, we
+      // clear it.
+      this._dismissTransactionError();
+
+      // We send the transaction, and save its hash in the Dapp's state. This
+      // way we can indicate that we are waiting for it to be mined.
+      const tx = await this._eventCreator.createEvent(numTickets, price, canBeResold, royaltyPercent, name, symbol);
+      this.setState({ txBeingSent: tx.hash });
+
+      // We use .wait() to wait for the transaction to be mined. This method
+      // returns the transaction's receipt.
+      const receipt = await tx.wait();
+
+      // The receipt, contains a status flag, which is 0 to indicate an error.
+      if (receipt.status === 0) {
+        // We can't know the exact error that made the transaction fail when it
+        // was mined, so we throw this generic one.
+        throw new Error("Transaction failed");
+      }
+
+      // If we got here, the transaction was successful, so you may want to
+      // update your state. Here, we update the user's balance.
+      await this._updateBalance();
+    } catch (error) {
+      // We check the error code to see if this error was produced because the
+      // user rejected a tx. If that's the case, we do nothing.
+      if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
+        return;
+      }
+
+      // Other errors are logged and stored in the Dapp's state. This is used to
+      // show them to the user, and for debugging.
+      console.error("Error: ", error);
+      this.setState({ transactionError: error });
+    } finally {
+      // If we leave the try/catch, we aren't sending a tx anymore, so we clear
+      // this part of the state.
+      this.setState({ txBeingSent: undefined });
+    }
+  }
+
+    // This method sends an ethereum transaction to transfer tokens.
+  // While this action is specific to this application, it illustrates how to
+  // send a transaction.
+  async _setEventStage(index) {
+    console.log("*** Inside set event stage")
+    // Sending a transaction is a complex operation:
+    //   - The user can reject it
+    //   - It can fail before reaching the ethereum network (i.e. if the user
+    //     doesn't have ETH for paying for the tx's gas)
+    //   - It has to be mined, so it isn't immediately confirmed.
+    //     Note that some testing networks, like Hardhat Network, do mine
+    //     transactions immediately, but your dapp should be prepared for
+    //     other networks.
+    //   - It can fail once mined.
+    //
+    // This method handles all of those things, so keep reading to learn how to
+    // do it.
+
+    try {
+      // If a transaction fails, we save that error in the component's state.
+      // We only save one such error, so before sending a second transaction, we
+      // clear it.
+      this._dismissTransactionError();
+
+      // We send the transaction, and save its hash in the Dapp's state. This
+      // way we can indicate that we are waiting for it to be mined.
+      console.log("this.state.eventStage: ", this.state.eventStage);
+      const tx = await this._eventCreator.setStage(parseInt(this.state.eventStage));
+      console.log("TX: ", tx);
+      this.setState({ txBeingSent: tx.hash });
+
+      // We use .wait() to wait for the transaction to be mined. This method
+      // returns the transaction's receipt.
+      const receipt = await tx.wait();
+
+      // The receipt, contains a status flag, which is 0 to indicate an error.
+      if (receipt.status === 0) {
+        // We can't know the exact error that made the transaction fail when it
+        // was mined, so we throw this generic one.
+        throw new Error("Transaction failed");
+      }
+
+      // If we got here, the transaction was successful, so you may want to
+      // update your state. Here, we update the user's balance.
+      await this._updateBalance();
+    } catch (error) {
+      // We check the error code to see if this error was produced because the
+      // user rejected a tx. If that's the case, we do nothing.
+      if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
+        return;
+      }
+
+      // Other errors are logged and stored in the Dapp's state. This is used to
+      // show them to the user, and for debugging.
+      this.setState({ transactionError: error });
+    } finally {
+      // If we leave the try/catch, we aren't sending a tx anymore, so we clear
+      // this part of the state.
+      this.setState({ txBeingSent: undefined });
+    }
+  }
+
+  // async _getEventsData() {
+  //   const events = await this._token.events();
+  //   const symbol = await this._token.symbol();
+
+  //   this.setState({ tokenData: { name, symbol } });
+  // }
 }

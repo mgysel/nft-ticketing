@@ -20,19 +20,30 @@ async function main() {
     await deployer.getAddress()
   );
 
-  console.log("Account balance:", (await deployer.getBalance()).toString());
-
+  // Deploy and save Token contract
   const Token = await ethers.getContractFactory("Token");
   const token = await Token.deploy();
   await token.deployed();
-
   console.log("Token address:", token.address);
 
+  // Deploy and save EventCreator contract 
+  const EventCreator = await ethers.getContractFactory("EventCreator");
+  const eventCreator = await EventCreator.deploy();
+  await eventCreator.deployed();
+  console.log("EventCreator address:", eventCreator.address);
+
   // We also save the contract's artifacts and address in the frontend directory
-  saveFrontendFiles(token);
+  saveFrontendFiles(token, eventCreator);
+
+  // // Deploy and save Event contract 
+  // const Event = await ethers.getContractFactory("Event");
+  // const event = await Event.deploy();
+  // await event.deployed();
+  // console.log("Event address:", event.address);
+  // saveFrontendFiles(event);
 }
 
-function saveFrontendFiles(token) {
+function saveFrontendFiles(token, eventCreator) {
   const fs = require("fs");
   const contractsDir = path.join(__dirname, "..", "frontend", "src", "contracts");
 
@@ -42,14 +53,24 @@ function saveFrontendFiles(token) {
 
   fs.writeFileSync(
     path.join(contractsDir, "contract-address.json"),
-    JSON.stringify({ Token: token.address }, undefined, 2)
+    JSON.stringify({ Token: token.address, EventCreator: eventCreator.address }, undefined, 2)
   );
 
   const TokenArtifact = artifacts.readArtifactSync("Token");
+  const EventCreatorArtifact = artifacts.readArtifactSync("EventCreator");
+  const EventArtifact = artifacts.readArtifactSync("Event");
 
   fs.writeFileSync(
     path.join(contractsDir, "Token.json"),
     JSON.stringify(TokenArtifact, null, 2)
+  );
+  fs.writeFileSync(
+    path.join(contractsDir, "EventCreator.json"),
+    JSON.stringify(EventCreatorArtifact, null, 2)
+  );
+  fs.writeFileSync(
+    path.join(contractsDir, "Event.json"),
+    JSON.stringify(EventArtifact, null, 2)
   );
 }
 
