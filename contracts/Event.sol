@@ -73,6 +73,8 @@ contract Event is ERC721 {
     
     // number of tickets left to sell
     uint256 public numTicketsLeft;
+
+    uint256 public numTickets;
     
     // if ticket can be resold in the second market
     bool public canBeResold;
@@ -94,7 +96,7 @@ contract Event is ERC721 {
     event OwnerWithdrawMoney(address owner, uint money);
     event TicketForSale(address seller, uint ticketID);
     event TicketSold(address contractAddress, string eventName, address buyer, uint ticketID);
-    event TicketUsed(address contractAddress, uint ticketID, string eventName, string sQRCodeKey);
+    event TicketUsed(address contractAddress, uint ticketID, string eventName);
 
     // Creates a new Event Contract
     constructor(address _owner, uint _numTickets, uint _price, bool _canBeResold, uint _royaltyPercent,
@@ -106,6 +108,7 @@ contract Event is ERC721 {
         
         owner = payable(_owner);
         numTicketsLeft = _numTickets;
+        numTickets = _numTickets;
         price = _price;
         canBeResold = _canBeResold;
         royaltyPercent = _royaltyPercent;
@@ -171,12 +174,11 @@ contract Event is ERC721 {
      * @notice Mark ticket as used
      * @dev Only a valid buyer can mark ticket as used
      * @param ticketID ticket ID of ticket
-     * @param sQRCodeKey QR Code key sent by the app 
      */
-    function setTicketToUsed(uint ticketID, string memory sQRCodeKey) public requiredStage(Stages.CheckinOpen)
+    function setTicketToUsed(uint ticketID) public requiredStage(Stages.CheckinOpen)
                                                                     ownsTicket(ticketID) {
 		// Validate that user has a ticket they own and it is valid
-        require(tickets[ticketID].status == TicketStatus.Valid, "");
+        require(tickets[ticketID].status == TicketStatus.Valid, "not valid status");
     
         // Ticket is valid so mark it as used
         tickets[ticketID].status = TicketStatus.Used;
@@ -185,7 +187,7 @@ contract Event is ERC721 {
         _burn(ticketID); 
         
         // Raise event which Gate Management system can consume then
-        emit TicketUsed(address(this), ticketID, name(), sQRCodeKey);
+        emit TicketUsed(address(this), ticketID, name());
 	}
 
     /**
@@ -295,13 +297,13 @@ contract Event is ERC721 {
 
     // Requires stage to be _stage
     modifier requiredStage(Stages _stage) {
-        require(stage == _stage, "");
+        require(stage == _stage, "different stage");
         _;
     }
 
     // Check if user is ticket owner
     modifier ownsTicket(uint ticketID) {
-        require(ownerOf(ticketID) == msg.sender, "");
+        require(ownerOf(ticketID) == msg.sender, "does not own ticket");
         _;
     }
 }

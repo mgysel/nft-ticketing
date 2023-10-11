@@ -249,28 +249,27 @@ describe('Event', (accounts) => {
       // enum Stages { Prep, Active, CheckinOpen, Cancelled, Closed }
       // Prep (0) Stage
       await hardhatEvent.connect(owner).setStage(0);
-      await expect(hardhatEvent.setTicketToUsed(1, "2")).to.be.reverted;
+      await expect(hardhatEvent.setTicketToUsed(1)).to.be.reverted;
 
       // Active (1) Stage
       await hardhatEvent.connect(owner).setStage(1);
-      await expect(hardhatEvent.setTicketToUsed(1, "2")).to.be.reverted;
+      await expect(hardhatEvent.setTicketToUsed(1)).to.be.reverted;
 
       // Cancelled (3) Stage
       await hardhatEvent.connect(owner).setStage(3);
-      await expect(hardhatEvent.setTicketToUsed(1, "2")).to.be.reverted;
+      await expect(hardhatEvent.setTicketToUsed(1)).to.be.reverted;
 
       // Closed (4) Stage
       await hardhatEvent.connect(owner).setStage(4);
-      await expect(hardhatEvent.setTicketToUsed(1, "2")).to.be.reverted;
+      await expect(hardhatEvent.setTicketToUsed(1)).to.be.reverted;
     })
     
     it('checking ticket mark as used', async () => {
       const { Event, hardhatEvent, owner, buyer1 } = await loadFixture(deployEventFixtureSetTicketUsed);
       
       let ticketID = 0;
-      let sQRCodeKey = "12345";
-      let t = await hardhatEvent.connect(buyer1).setTicketToUsed(ticketID, sQRCodeKey);
-      expect(t).emit(hardhatEvent, "TicketUsed").withArgs(ticketID, sQRCodeKey);
+      let t = await hardhatEvent.connect(buyer1).setTicketToUsed(ticketID);
+      expect(t).emit(hardhatEvent, "TicketUsed").withArgs(ticketID);
     })
   });
 
@@ -320,7 +319,7 @@ describe('Event', (accounts) => {
       const { Event, hardhatEvent, owner, buyer1 } = await loadFixture(deployEventFixtureBuyTicket);
 
       await hardhatEvent.connect(owner).setStage(2);
-      await hardhatEvent.connect(buyer1).setTicketToUsed(0, "12345");
+      await hardhatEvent.connect(buyer1).setTicketToUsed(0);
       await expect(hardhatEvent.connect(buyer1).setTicketForSale(0, 100)).to.be.reverted;
     })
   })
