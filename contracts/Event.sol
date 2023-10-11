@@ -135,8 +135,6 @@ contract Event is ERC721 {
         // Mint NFT
         _safeMint(msg.sender, ticketID);
         emit CreateTicket(address(this), name(), msg.sender, ticketID);
-
-
     }
 
     /**

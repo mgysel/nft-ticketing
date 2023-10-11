@@ -365,7 +365,7 @@ describe('Event', (accounts) => {
       await hardhatEvent.connect(buyer2).buyTicketFromUser(ticketID);
       let newTicketOwner = await hardhatEvent.ownerOf(ticketID);
       await expect(newTicketOwner).to.equal(buyer2.address);
-    })
+    });
 
     it('checking buyer 2 recieves NFT after buying ticket from buyer 1', async () => {
       const { Event, hardhatEvent, owner, buyer1, buyer2 } = await loadFixture(deployEventFixtureBuyTicket);
