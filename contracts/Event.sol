@@ -178,7 +178,7 @@ contract Event is ERC721 {
     function setTicketToUsed(uint ticketID) public requiredStage(Stages.CheckinOpen)
                                                                     ownsTicket(ticketID) {
 		// Validate that user has a ticket they own and it is valid
-        require(tickets[ticketID].status == TicketStatus.Valid, "not valid status");
+        require(tickets[ticketID].status == TicketStatus.Valid, "");
     
         // Ticket is valid so mark it as used
         tickets[ticketID].status = TicketStatus.Used;
@@ -297,13 +297,13 @@ contract Event is ERC721 {
 
     // Requires stage to be _stage
     modifier requiredStage(Stages _stage) {
-        require(stage == _stage, "different stage");
+        require(stage == _stage, "");
         _;
     }
 
     // Check if user is ticket owner
     modifier ownsTicket(uint ticketID) {
-        require(ownerOf(ticketID) == msg.sender, "does not own ticket");
+        require(ownerOf(ticketID) == msg.sender, "");
         _;
     }
 }
