@@ -20,12 +20,6 @@ async function main() {
     await deployer.getAddress()
   );
 
-  // Deploy and save Token contract
-  const Token = await ethers.getContractFactory("Token");
-  const token = await Token.deploy();
-  await token.deployed();
-  console.log("Token address:", token.address);
-
   // Deploy and save EventCreator contract 
   const EventCreator = await ethers.getContractFactory("EventCreator");
   const eventCreator = await EventCreator.deploy();
@@ -34,13 +28,6 @@ async function main() {
 
   // We also save the contract's artifacts and address in the frontend directory
   saveFrontendFiles(token, eventCreator);
-
-  // // Deploy and save Event contract 
-  // const Event = await ethers.getContractFactory("Event");
-  // const event = await Event.deploy();
-  // await event.deployed();
-  // console.log("Event address:", event.address);
-  // saveFrontendFiles(event);
 }
 
 function saveFrontendFiles(token, eventCreator) {
