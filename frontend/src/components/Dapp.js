@@ -154,7 +154,7 @@ export class Dapp extends React.Component {
                   Account: {this.state.selectedAddress.toString()}
                 </Box>
                 <Box className="navbar-brand pt-0 mt-0" justify="right">
-                  Balance: {this.state.balance.toString()}
+                  Balance: {this.state.balance.toString()} ETH
                 </Box>
               </VStack>
             </nav>
@@ -269,8 +269,8 @@ export class Dapp extends React.Component {
                             >
                               Can tickets be resold?
                             </FormLabel>
-                            <Radio value={true}>Yes</Radio>
-                            <Radio value={false}>No</Radio>
+                            <Radio mt="5px" value={true}>Yes</Radio>
+                            <Radio mt="5px" value={false}>No</Radio>
                           </Stack>
                         </RadioGroup>
                         <Input
@@ -621,6 +621,7 @@ export class Dapp extends React.Component {
   }
 
   async _connectWallet() {
+    console.log("*** Inside connectWallet")
     // This method is run when the user clicks the Connect. It connects the
     // dapp to the user's wallet, and initializes it.
 
@@ -633,6 +634,7 @@ export class Dapp extends React.Component {
     // First we check the network
     this._checkNetwork();
 
+    console.log("SELECTED ADDRESS: ", selectedAddress);
     this._initialize(selectedAddress);
 
     // We reinitialize it whenever the user changes their account.
@@ -710,6 +712,7 @@ export class Dapp extends React.Component {
 
     // We run it once immediately so we don't have to wait for it
     this._updateBalance();
+    this._getEventsData()
   }
 
   _stopPollingData() {
@@ -727,7 +730,7 @@ export class Dapp extends React.Component {
   }
 
   async _updateBalance() {
-    const balance = await this._token.balanceOf(this.state.selectedAddress);
+    const balance = ethers.utils.formatEther((await this._provider.getBalance(this.state.selectedAddress)).toString());
     this.setState({ balance });
   }
 
