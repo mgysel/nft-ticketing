@@ -17,6 +17,7 @@ import { ConnectWallet } from "../../error_handling/ConnectWallet";
 import { Loading } from "../../error_handling/Loading";
 import { TransactionErrorMessage } from "../../error_handling/TransactionErrorMessage";
 import { WaitingForTransactionMessage } from "../../error_handling/WaitingForTransactionMessage";
+import { EmptyMessage } from "../../error_handling/EmptyMessage";
 
 import {
   Heading,
@@ -66,15 +67,9 @@ const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 // transaction.
 export class SecondaryMarketTickets extends React.Component {  
   async buyTicketFromOwner(event, ticket) {
-    console.log("*** Inside buyTicketFromOwner");
-    console.log("event: ", event);
-    console.log("Ticket: ", ticket);
     try {
-      console.log("Before dismissTransactionError");
       this.props.dismissTransactionError();
-      console.log("Before tx");
       const tx = await event.contract.buyTicketFromUser(ticket.ticketID);
-      console.log("After tx");
       this.props.setState({ txBeingSent: tx.hash });
       const receipt = await tx.wait();
 
@@ -146,69 +141,77 @@ export class SecondaryMarketTickets extends React.Component {
   return (
   <TabPanel mt="15px" mb="15px" align="center">
     <Heading mb="25px">Secondary Market Tickets</Heading>
-    <SimpleGrid columns={4} spacing={10} mt="30px">
-      { 
-        this.props.state.events.map((event, indexEvent) => (
-            event.tickets.map((ticket, indexTicket) => (
-              ticket.status === 2 && 
-                <Box 
-                  key={indexTicket} 
-                  borderRadius="5px"
-                  border="1px solid"
-                  borderColor="gray.200"
-                  p="20px" 
-                  width="20rem"
-                >
-                  <Text isTruncated fontWeight="bold" fontSize="xl" mb="7px"> Event {event.name}</Text>
-                  <Text>Event: {event.name}</Text>
-                  <Text>Ticket ID: {ticket.ticketID}</Text>
-                  <Button 
-                    type='submit' 
-                    color={this.props.state.darkGreen}
-                    backgroundColor={this.props.state.lightGreen}
-                    size="lg"
-                    mt="13px"
-                    width="220px"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      this.registerToBuy(event, ticket)
-                    }}
+    {
+        this.props.state.events.length === 0 && (
+          <EmptyMessage message={`No secondary market tickets available.\n Come back when more tickets are up for sale!`} />
+        )
+    }
+
+    { this.props.state.events.length > 0 &&
+      <SimpleGrid columns={4} spacing={10} mt="30px">
+        { 
+          this.props.state.events.map((event, indexEvent) => (
+              event.tickets.map((ticket, indexTicket) => (
+                ticket.status === 2 && 
+                  <Box 
+                    key={indexTicket} 
+                    borderRadius="5px"
+                    border="1px solid"
+                    borderColor="gray.200"
+                    p="20px" 
+                    width="20rem"
                   >
-                      Register To Buy
-                  </Button>
-                  <Button 
-                    type='submit' 
-                    color={this.props.state.darkGreen}
-                    backgroundColor={this.props.state.lightGreen}
-                    size="lg"
-                    mt="13px"
-                    width="220px"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      this.approveSale(event, ticket)
-                    }}
-                  >
-                      Approve Sale
-                  </Button>
-                  <Button 
-                    type='submit' 
-                    color={this.props.state.darkGreen}
-                    backgroundColor={this.props.state.lightGreen}
-                    size="lg"
-                    mt="13px"
-                    width="220px"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      this.buyTicketFromOwner(event, ticket)
-                    }}
-                  >
-                      Buy Ticket From Owner
-                  </Button>
-                </Box>
-          )
-        )))
-      }
-    </SimpleGrid>
+                    <Text isTruncated fontWeight="bold" fontSize="xl" mb="7px"> Event {event.name}</Text>
+                    <Text>Event: {event.name}</Text>
+                    <Text>Ticket ID: {ticket.ticketID}</Text>
+                    <Button 
+                      type='submit' 
+                      color={this.props.state.darkGreen}
+                      backgroundColor={this.props.state.lightGreen}
+                      size="lg"
+                      mt="13px"
+                      width="220px"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        this.registerToBuy(event, ticket)
+                      }}
+                    >
+                        Register To Buy
+                    </Button>
+                    <Button 
+                      type='submit' 
+                      color={this.props.state.darkGreen}
+                      backgroundColor={this.props.state.lightGreen}
+                      size="lg"
+                      mt="13px"
+                      width="220px"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        this.approveSale(event, ticket)
+                      }}
+                    >
+                        Approve Sale
+                    </Button>
+                    <Button 
+                      type='submit' 
+                      color={this.props.state.darkGreen}
+                      backgroundColor={this.props.state.lightGreen}
+                      size="lg"
+                      mt="13px"
+                      width="220px"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        this.buyTicketFromOwner(event, ticket)
+                      }}
+                    >
+                        Buy Ticket From Owner
+                    </Button>
+                  </Box>
+            )
+          )))
+        }
+      </SimpleGrid>
+    }
   </TabPanel>
   )}
 }

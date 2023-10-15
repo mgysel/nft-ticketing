@@ -1,55 +1,19 @@
 import React from "react";
 
-// We'll use ethers to interact with the Ethereum network and our contract
-import { ethers } from "ethers";
-
-// We import the contract's artifacts and address here, as we are going to be
-// using them with ethers
-import EventArtifact from "../../../contracts/Event.json";
-import EventCreatorArtifact from "../../../contracts/EventCreator.json";
-import contractAddress from "../../../contracts/contract-address.json";
-
 // All the logic of this dapp is contained in the Dapp component.
 // These other components are just presentational ones: they don't have any
 // logic. They just render HTML.
-import { NoWalletDetected } from "../../error_handling/NoWalletDetected";
-import { ConnectWallet } from "../../error_handling/ConnectWallet";
-import { Loading } from "../../error_handling/Loading";
-import { TransactionErrorMessage } from "../../error_handling/TransactionErrorMessage";
-import { WaitingForTransactionMessage } from "../../error_handling/WaitingForTransactionMessage";
+import { EmptyMessage } from "../../error_handling/EmptyMessage";
 
 import {
   Heading,
-  Flex,
-  Center,
-  Wrap,
-  WrapItem,
   Button,
   Text,
-  Form,
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
-  FormHelperText,
-  IconButton,
-  Icon,
   Input,
-  InputGroup,
   SimpleGrid,
   Box,
-  VStack,
-  Stack,
-  Radio,
-  RadioGroup,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
   TabPanel
 } from "@chakra-ui/react";
-
-// This is the default id used by the Hardhat Network
-const HARDHAT_NETWORK_ID = '31337';
 
 // This is an error code that indicates that the user canceled a transaction
 const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
@@ -93,82 +57,90 @@ export class MyTickets extends React.Component {
   return (
     <TabPanel mt="15px" mb="15px" align="center">
     <Heading mb="25px">My Tickets</Heading>
-    <SimpleGrid columns={4} spacing={10} mt="30px">
-      { 
-        this.props.state.events.map((event, index) => (
-          event.myTicketsNum > 0 && 
-            <Box 
-              key={index}
-              borderRadius="5px"
-              border="1px solid"
-              borderColor="gray.200"
-              p="20px"
-              width="20rem"
-            >
-              <Text isTruncated fontWeight="bold" fontSize="xl" mb="7px">Ticket for Event {event.name}</Text>
-              <Text>Event: {event.name}</Text>
-              <Text>Num Tickets: {event.myTicketsNum}</Text>
-              <Text>Ticket IDs: {event.myTicketsID.join(", ")}</Text>
-              <Box                       
+    {
+      this.props.state.events.length === 0 && (
+        <EmptyMessage message={`You don't have any tickets.\n Purchase tickets to have fun at our events!`} />
+      )
+    }
+
+    { this.props.state.events.length > 0 &&
+      <SimpleGrid columns={4} spacing={10} mt="30px">
+        { 
+          this.props.state.events.map((event, index) => (
+            event.myTicketsNum > 0 && 
+              <Box 
+                key={index}
                 borderRadius="5px"
                 border="1px solid"
-                borderColor="gray.100"
-                padding="10px"
-                mt="10px"
+                borderColor="gray.200"
+                p="20px"
+                width="20rem"
               >
-                <form>
-                  <Input
-                    isRequired
-                    id='resalePrice'
-                    type='number'
-                    size="md"
-                    placeholder='Set Resale Price'
-                    onChange={(e) => this.props.setState({"resalePrice": e.target.value})}
-                    mb="0px"
-                    mt="10px"
-                    _placeholder={{ color: 'gray.500' }}
-                  />
-                  <Input
-                    isRequired
-                    id='resalePrice'
-                    type='number'
-                    size="md"
-                    placeholder='Set Ticket ID'
-                    onChange={(e) => this.props.setState({"resaleTicketID": e.target.value})}
-                    mb="0px"
-                    mt="10px"
-                    _placeholder={{ color: 'gray.500' }}
-                  />
-                  <Button 
-                    type='submit' 
-                    color={this.props.state.darkGreen}
-                    backgroundColor={this.props.state.lightGreen}
-                    size="lg"
-                    mt="10px"
-                    width="210px"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      this.setTicketForSale(event, this.props.state.resaleTicketID, this.props.state.resalePrice);
-                    }}
-                  >
-                    Set Ticket For Sale
-                  </Button>
-                </form>
+                <Text isTruncated fontWeight="bold" fontSize="xl" mb="7px">Ticket for Event {event.name}</Text>
+                <Text>Event: {event.name}</Text>
+                <Text>Num Tickets: {event.myTicketsNum}</Text>
+                <Text>Ticket IDs: {event.myTicketsID.join(", ")}</Text>
+                <Box                       
+                  borderRadius="5px"
+                  border="1px solid"
+                  borderColor="gray.100"
+                  padding="10px"
+                  mt="10px"
+                >
+                  <form>
+                    <Input
+                      isRequired
+                      id='resalePrice'
+                      type='number'
+                      size="md"
+                      placeholder='Set Resale Price'
+                      onChange={(e) => this.props.setState({"resalePrice": e.target.value})}
+                      mb="0px"
+                      mt="10px"
+                      _placeholder={{ color: 'gray.500' }}
+                    />
+                    <Input
+                      isRequired
+                      id='resalePrice'
+                      type='number'
+                      size="md"
+                      placeholder='Set Ticket ID'
+                      onChange={(e) => this.props.setState({"resaleTicketID": e.target.value})}
+                      mb="0px"
+                      mt="10px"
+                      _placeholder={{ color: 'gray.500' }}
+                    />
+                    <Button 
+                      type='submit' 
+                      color={this.props.state.darkGreen}
+                      backgroundColor={this.props.state.lightGreen}
+                      size="lg"
+                      mt="10px"
+                      width="210px"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        this.setTicketForSale(event, this.props.state.resaleTicketID, this.props.state.resalePrice);
+                      }}
+                    >
+                      Set Ticket For Sale
+                    </Button>
+                  </form>
+                </Box>
+                <Button 
+                  type='submit' 
+                  color={this.props.state.darkGreen}
+                  backgroundColor={this.props.state.lightGreen}
+                  size="lg"
+                  mt="10px"
+                  width="210px"
+                >
+                  Withdraw Balance
+                </Button>
               </Box>
-              <Button 
-                type='submit' 
-                color={this.props.state.darkGreen}
-                backgroundColor={this.props.state.lightGreen}
-                size="lg"
-                mt="10px"
-                width="210px"
-              >
-                Withdraw Balance
-              </Button>
-            </Box>
-        ))
-      }
-    </SimpleGrid>
+          ))
+        }
+      </SimpleGrid>
+    }
   </TabPanel>
   )}
 }

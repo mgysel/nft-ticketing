@@ -1,55 +1,18 @@
 import React from "react";
 
-// We'll use ethers to interact with the Ethereum network and our contract
-import { ethers } from "ethers";
-
-// We import the contract's artifacts and address here, as we are going to be
-// using them with ethers
-import EventArtifact from "../../../contracts/Event.json";
-import EventCreatorArtifact from "../../../contracts/EventCreator.json";
-import contractAddress from "../../../contracts/contract-address.json";
-
-// All the logic of this dapp is contained in the Dapp component.
-// These other components are just presentational ones: they don't have any
-// logic. They just render HTML.
-import { NoWalletDetected } from "../../error_handling/NoWalletDetected";
-import { ConnectWallet } from "../../error_handling/ConnectWallet";
-import { Loading } from "../../error_handling/Loading";
-import { TransactionErrorMessage } from "../../error_handling/TransactionErrorMessage";
-import { WaitingForTransactionMessage } from "../../error_handling/WaitingForTransactionMessage";
+import { EmptyMessage } from "../../error_handling/EmptyMessage";
 
 import {
   Heading,
-  Flex,
-  Center,
-  Wrap,
-  WrapItem,
   Button,
   Text,
-  Form,
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
-  FormHelperText,
-  IconButton,
-  Icon,
-  Input,
-  InputGroup,
   SimpleGrid,
   Box,
-  VStack,
   Stack,
   Radio,
   RadioGroup,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
   TabPanel
 } from "@chakra-ui/react";
-
-// This is the default id used by the Hardhat Network
-const HARDHAT_NETWORK_ID = '31337';
 
 // This is an error code that indicates that the user canceled a transaction
 const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
@@ -99,74 +62,82 @@ export class MyEvents extends React.Component {
   return (
     <TabPanel mt="15px" mb="15px" align="center">
       <Heading mb="25px">My Events</Heading>
-      <SimpleGrid columns={4} spacing={10} mt="30px">
-        { 
-          this.props.state.events.map((event, index) => (
-            <Box 
-              key={index} 
-              borderRadius="5px"
-              border="1px solid"
-              borderColor="gray.200"
-              p="20px" 
-              width="20rem"
-            >
-              <Text isTruncated fontWeight="bold" fontSize="xl" mb="7px"> Event {index + 1}</Text>
-              <Text>Event: {event.name}</Text>
-              <Text>Balance: {event.ownerBalance}</Text>
-              <Text>Number of Tickets Left: {event.numTicketsLeft}</Text>
-              <Box
+      {
+        this.props.state.events.length === 0 && (
+          <EmptyMessage message={`You have not created any events yet!`} />
+        )
+      }
+
+      { this.props.state.events.length > 0 &&
+        <SimpleGrid columns={4} spacing={10} mt="30px">
+          { 
+            this.props.state.events.map((event, index) => (
+              <Box 
+                key={index} 
                 borderRadius="5px"
                 border="1px solid"
-                borderColor="gray.100"
-                padding="10px"
-                mt="10px"
+                borderColor="gray.200"
+                p="20px" 
+                width="20rem"
               >
-                <RadioGroup 
-                  mb="10px"
-                  onChange={(e) => {
-                    e.preventDefault()
-                    this.props.setState({eventStage: e});
-                  }} 
-                  value={event.stage.toString() == this.props.state.eventStage ? this.props.state.eventStage : event.stage.toString()}
-                  defaultValue={event.stage.toString()}
+                <Text isTruncated fontWeight="bold" fontSize="xl" mb="7px"> Event {index + 1}</Text>
+                <Text>Event: {event.name}</Text>
+                <Text>Balance: {event.ownerBalance}</Text>
+                <Text>Number of Tickets Left: {event.numTicketsLeft}</Text>
+                <Box
+                  borderRadius="5px"
+                  border="1px solid"
+                  borderColor="gray.100"
+                  padding="10px"
+                  mt="10px"
                 >
-                  <Stack spacing={4} direction="column">
-                    <Radio value="0" mb="0">Prep</Radio>
-                    <Radio value="1">Active</Radio>
-                    <Radio value="2">Checkin Open</Radio>
-                    <Radio value="3">Cancelled</Radio>
-                    <Radio value="4">Closed</Radio>
-                  </Stack>
-                </RadioGroup>
+                  <RadioGroup 
+                    mb="10px"
+                    onChange={(e) => {
+                      e.preventDefault()
+                      this.props.setState({eventStage: e});
+                    }} 
+                    value={event.stage.toString() == this.props.state.eventStage ? this.props.state.eventStage : event.stage.toString()}
+                    defaultValue={event.stage.toString()}
+                  >
+                    <Stack spacing={4} direction="column">
+                      <Radio value="0" mb="0">Prep</Radio>
+                      <Radio value="1">Active</Radio>
+                      <Radio value="2">Checkin Open</Radio>
+                      <Radio value="3">Cancelled</Radio>
+                      <Radio value="4">Closed</Radio>
+                    </Stack>
+                  </RadioGroup>
+                  <Button 
+                    type='submit' 
+                    color={this.props.state.darkGreen}
+                    backgroundColor={this.props.state.lightGreen}
+                    size="lg"
+                    mt="10px"
+                    width="210px"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      this.setEventStage(index)
+                    }}
+                  >
+                    Set Event Stage
+                  </Button>
+                </Box>
                 <Button 
-                  type='submit' 
-                  color={this.props.state.darkGreen}
-                  backgroundColor={this.props.state.lightGreen}
-                  size="lg"
-                  mt="10px"
-                  width="210px"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    this.setEventStage(index)
-                  }}
-                >
-                  Set Event Stage
-                </Button>
+                    type='submit' 
+                    color={this.props.state.darkGreen}
+                    backgroundColor={this.props.state.lightGreen}
+                    size="lg"
+                    mt="10px"
+                    width="210px"
+                  >
+                    Owner Withdraw
+                  </Button>
               </Box>
-              <Button 
-                  type='submit' 
-                  color={this.props.state.darkGreen}
-                  backgroundColor={this.props.state.lightGreen}
-                  size="lg"
-                  mt="10px"
-                  width="210px"
-                >
-                  Owner Withdraw
-                </Button>
-            </Box>
-          ))
-        }
-      </SimpleGrid>
+            ))
+          }
+        </SimpleGrid>
+      }
   </TabPanel>
   )}
 }
