@@ -27,10 +27,10 @@ async function main() {
   console.log("EventCreator address:", eventCreator.address);
 
   // We also save the contract's artifacts and address in the frontend directory
-  saveFrontendFiles(token, eventCreator);
+  saveFrontendFiles(eventCreator);
 }
 
-function saveFrontendFiles(token, eventCreator) {
+function saveFrontendFiles(eventCreator) {
   const fs = require("fs");
   const contractsDir = path.join(__dirname, "..", "frontend", "src", "contracts");
 
@@ -40,17 +40,12 @@ function saveFrontendFiles(token, eventCreator) {
 
   fs.writeFileSync(
     path.join(contractsDir, "contract-address.json"),
-    JSON.stringify({ Token: token.address, EventCreator: eventCreator.address }, undefined, 2)
+    JSON.stringify({ EventCreator: eventCreator.address }, undefined, 2)
   );
 
-  const TokenArtifact = artifacts.readArtifactSync("Token");
   const EventCreatorArtifact = artifacts.readArtifactSync("EventCreator");
   const EventArtifact = artifacts.readArtifactSync("Event");
 
-  fs.writeFileSync(
-    path.join(contractsDir, "Token.json"),
-    JSON.stringify(TokenArtifact, null, 2)
-  );
   fs.writeFileSync(
     path.join(contractsDir, "EventCreator.json"),
     JSON.stringify(EventCreatorArtifact, null, 2)

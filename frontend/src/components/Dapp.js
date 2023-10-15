@@ -18,6 +18,11 @@ import { Loading } from "./error_handling/Loading";
 import { TransactionErrorMessage } from "./error_handling/TransactionErrorMessage";
 import { WaitingForTransactionMessage } from "./error_handling/WaitingForTransactionMessage";
 
+// Event Tabs
+import { CreateEvent } from "./tabs/CreateEvent.js";
+import { BuyTickets } from "./tabs/BuyTickets.js";
+import { SecondaryMarketTickets } from "./tabs/SecondaryMarketTickets.js";
+
 import {
   Heading,
   Flex,
@@ -99,6 +104,9 @@ export class Dapp extends React.Component {
     };
 
     this.state = this.initialState;
+    
+    // Binding setState to this
+    this.setState = this.setState.bind(this);
   }
 
   render() {
@@ -183,216 +191,30 @@ export class Dapp extends React.Component {
                   </Tab>
                 </TabList>
                 <TabPanels>
-                <TabPanel mt="15px" mb="15px" align="center">
-                  <Stack width="600px" align="center" justify="center">
-                    <Heading mb="25px">Create an Event Now</Heading>
-                      <form
-                        onSubmit={(e) => {
-                          e.preventDefault()
-                          this._createEvent(
-                            this.state.formNumTickets, 
-                            this.state.formPrice, 
-                            this.state.formCanBeResold, 
-                            this.state.formRoyaltyPercent, 
-                            this.state.formEventName, 
-                            this.state.formEventSymbol
-                          )
-                        }}
-                      >
-                        <Input
-                          isRequired
-                          id='name'
-                          type='text'
-                          size="md"
-                          placeholder='Event name'
-                          onChange={(e) => this.setState({ formEventName: e.target.value })}
-                          mb="10px"
-                          _placeholder={{ color: 'gray.500' }}
-                          w="450px"
-                        />
-                        <Input
-                          isRequired
-                          id='symbol'
-                          type='text'
-                          size="md"
-                          placeholder='Token symbol'
-                          onChange={(e) => this.setState({ formEventSymbol: e.target.value })}
-                          mb="10px"
-                          _placeholder={{ color: 'gray.500' }}
-                          w="450px"
-                        />
-                        <Input
-                          isRequired
-                          id='numTickets'
-                          type='number'
-                          size="md"
-                          placeholder='Number of Tickets'
-                          onChange={(e) => this.setState({ formNumTickets: e.target.value })}
-                          mb="10px"
-                          _placeholder={{ color: 'gray.500' }}
-                          w="450px"
-                        />
-                        <Input
-                          isRequired
-                          id='price'
-                          type='number'
-                          size="md"
-                          placeholder='Price'
-                          onChange={(e) => this.setState({ formEventPrice: e.target.value })}
-                          mb="10px"
-                          _placeholder={{ color: 'gray.500' }}
-                          w="450px"
-                        />
-                        <RadioGroup 
-                          mb="10px"
-                          _placeholder={{ color: 'gray.500' }}
-                          w="450px"
-                          h="40px"
-                          onChange={(e) => this.setState({ formCanBeResold: e.target.value })}
-                          value={this.state.formCanBeResold}
-                          border="1px"
-                          borderRadius="5px"
-                          borderColor='gray.200'
-                          textAlign=""
-                        >
-                          <Stack spacing={4} direction="row">
-                            <FormLabel 
-                              color='gray.500' 
-                              verticalAlign='middle'
-                              ml="15px"
-                              mt="6px"
-                            >
-                              Can tickets be resold?
-                            </FormLabel>
-                            <Radio mt="5px" value={true}>Yes</Radio>
-                            <Radio mt="5px" value={false}>No</Radio>
-                          </Stack>
-                        </RadioGroup>
-                        <Input
-                          isRequired
-                          id='royaltyPercent'
-                          type='number'
-                          size="md"
-                          placeholder='Resale royalty (%)'
-                          onChange={(e) => this.setState({ formRoyaltyPercent: e.target.value })}
-                          mb="10px"
-                          _placeholder={{ color: 'gray.500' }}
-                          w="450px"
-                        />
-                      <Button 
-                        type='submit' 
-                        color={this.state.darkGreen}
-                        backgroundColor={this.state.lightGreen}
-                        size="lg"
-                        mt="10px"
-                      >
-                          CREATE EVENT
-                      </Button>
-                    </form>
-                  </Stack>
-                </TabPanel>
-                <TabPanel mt="15px" mb="15px" align="center">
-                  <Heading mb="25px">Purchase Tickets</Heading>
-                  <SimpleGrid columns={4} spacing={10} mt="30px">
-                    { 
-                      this.state.events.map((id, index) => (
-                          id.stage !== 0 && id.stage !== 2 && id.stage !== 5 && (
-                            <Box key={index}        
-                              borderRadius="5px"
-                              border="1px solid"
-                              borderColor="gray.200"
-                              p="20px" 
-                              width="20rem"
-                            >
-                              <Text isTruncated fontWeight="bold" fontSize="xl" mb="7px"> Event {index + 1}</Text>
-                              <Text>Name: {id.eventName}</Text>
-                              <Text>Symbol: {id.eventSymbol}</Text>
-                              <Text>Number of Tickets: {id.numTicketsLeft}</Text>
-                              <Text>Price: {id.price}</Text>
-                              <Text>Can Be Resold?: {id.canBeResold.toString()}</Text>
-                              <Text>Royalty Percent: {id.royaltyPercent}</Text>
-                              <Text>Stage: {id.stage}</Text>
-                              <Button 
-                                type='submit' 
-                                color={this.state.darkGreen}
-                                backgroundColor={this.state.lightGreen}
-                                size="lg"
-                                mt="13px"
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  this._buyTicket(index)
-                                }}
-                              >
-                                  Buy Ticket
-                              </Button>
-                            </Box>
-                          )
-                      ))
-                    }
-                  </SimpleGrid>
-                </TabPanel>
-                <TabPanel mt="15px" mb="15px" align="center">
-                  <Heading mb="25px">Secondary Market Tickets</Heading>
-                  <SimpleGrid columns={4} spacing={10} mt="30px">
-                    { 
-                      this.state.events.map((event, indexEvent) => (
-                          event.tickets.map((ticket, indexTicket) => (
-                            ticket.status === 2 && 
-                              <Box 
-                                key={indexTicket} 
-                                borderRadius="5px"
-                                border="1px solid"
-                                borderColor="gray.200"
-                                p="20px" 
-                                width="20rem"
-                              >
-                                <Text isTruncated fontWeight="bold" fontSize="xl" mb="7px"> Event {event.name}</Text>
-                                <Text>Event: {event.name}</Text>
-                                <Text>Ticket ID: {ticket.ticketID}</Text>
-                                <Button 
-                                  type='submit' 
-                                  color={this.state.darkGreen}
-                                  backgroundColor={this.state.lightGreen}
-                                  size="lg"
-                                  mt="13px"
-                                  width="220px"
-                                  onClick={(e) => {
-                                    e.preventDefault()
-                                    this._registerToBuy(event, ticket)
-                                  }}
-                                >
-                                    Register To Buy
-                                </Button>
-                                <Button 
-                                  type='submit' 
-                                  color={this.state.darkGreen}
-                                  backgroundColor={this.state.lightGreen}
-                                  size="lg"
-                                  mt="13px"
-                                  width="220px"
-                                >
-                                    Approve Sale
-                                </Button>
-                                <Button 
-                                  type='submit' 
-                                  color={this.state.darkGreen}
-                                  backgroundColor={this.state.lightGreen}
-                                  size="lg"
-                                  mt="13px"
-                                  width="220px"
-                                  onClick={(e) => {
-                                    e.preventDefault()
-                                    this._buyTicketFromOwner(event, ticket)
-                                  }}
-                                >
-                                    Buy Ticket From Owner
-                                </Button>
-                              </Box>
-                        )
-                      )))
-                    }
-                  </SimpleGrid>
-                </TabPanel>
+                <CreateEvent 
+                  state={this.state} 
+                  setState={this.setState} 
+                  dismissTransactionError={this._dismissTransactionError}
+                  eventCreator={this._eventCreator}
+                  updateBalance={this._updateBalance}
+                  getEventsData={this._getEventsData}
+                />
+                <BuyTickets 
+                  state={this.state} 
+                  setState={this.setState} 
+                  dismissTransactionError={this._dismissTransactionError}
+                  eventCreator={this._eventCreator}
+                  updateBalance={this._updateBalance}
+                  getEventsData={this._getEventsData}
+                />
+                <SecondaryMarketTickets 
+                  state={this.state} 
+                  setState={this.setState} 
+                  dismissTransactionError={this._dismissTransactionError}
+                  eventCreator={this._eventCreator}
+                  updateBalance={this._updateBalance}
+                  getEventsData={this._getEventsData}
+                />
                 <TabPanel mt="15px" mb="15px" align="center">
                   <Heading mb="25px">My Tickets</Heading>
                   <SimpleGrid columns={4} spacing={10} mt="30px">
@@ -548,7 +370,7 @@ export class Dapp extends React.Component {
                   <SimpleGrid columns={4} spacing={10} mt="30px">
                     { 
                       this.state.events.map((event, index) => (
-                        event.myTicketsNum > 0 && event.stage === 3 &&
+                        event.myTicketsNum > 0 && event.stage === 2 &&
                           <Box 
                             key={index}
                             borderRadius="5px"
@@ -780,11 +602,13 @@ export class Dapp extends React.Component {
       let myTickets = (await thisEvent.balanceOf(this.state.selectedAddress)).toNumber();
       let myTicketsID = [];
       let numTicketsSold = (await thisEvent.numTickets()).toNumber() - (await thisEvent.numTicketsLeft()).toNumber();
+      // Get my tickets
       for (let j=0; j < numTicketsSold; j++) {
         await thisEvent.ownerOf(j).then(() => {
           myTicketsID.push(j);
         })
       }
+      // Get all tickets
       let tickets = [];
       for (let j=0; j < numTicketsSold; j++) {
         await thisEvent.tickets(j).then((ticket) => {
@@ -795,6 +619,13 @@ export class Dapp extends React.Component {
           });
         })
       }
+      // Get registered buyers for each ticket 
+      for (let j=0; j < tickets.length; j++) {
+        await thisEvent.registeredBuyers(tickets[j].ticketID).then((buyers) => {
+          tickets[j].registeredBuyers = buyers;
+        })
+      }
+
       console.log("TICKETS: ", tickets);
       // Create event data object
       let thisEventData = {
@@ -834,6 +665,7 @@ export class Dapp extends React.Component {
       }
 
       await this._updateBalance();
+      await this._getEventsData();
     } catch (error) {
       if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
         return;
@@ -856,30 +688,7 @@ export class Dapp extends React.Component {
         throw new Error("Transaction failed");
       }
       await this._updateBalance();
-    } catch (error) {
-      if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
-        return;
-      }
-      this.setState({ transactionError: error });
-    } finally {
-      this.setState({ txBeingSent: undefined });
-    }
-  }
-
-  async _buyTicket(index) {
-    console.log("*** Inside buyTicket");
-    try {
-      this._dismissTransactionError();
-      const tx = await this.state.events[index].contract.buyTicket();
-      this.setState({ txBeingSent: tx.hash });
-      const receipt = await tx.wait();
-      const tokenID = receipt.events[0].args[2];
-      console.log("TokenID: ", tokenID.toNumber());
-
-      if (receipt.status === 0) {
-        throw new Error("Transaction failed");
-      }
-      await this._updateBalance();
+      await this._getEventsData();
     } catch (error) {
       if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
         return;
@@ -902,50 +711,7 @@ export class Dapp extends React.Component {
       }
 
       await this._updateBalance();
-    } catch (error) {
-      if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
-        return;
-      }
-      this.setState({ transactionError: error });
-    } finally {
-      this.setState({ txBeingSent: undefined });
-    }
-  }
-
-  async _registerToBuy(event, ticket) {
-    try {
-      this._dismissTransactionError();
-      const tx = await event.contract.registerAsBuyer(ticket.ticketID);
-      this.setState({ txBeingSent: tx.hash });
-      const receipt = await tx.wait();
-
-      if (receipt.status === 0) {
-        throw new Error("Transaction failed");
-      }
-
-      await this._updateBalance();
-    } catch (error) {
-      if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
-        return;
-      }
-      this.setState({ transactionError: error });
-    } finally {
-      this.setState({ txBeingSent: undefined });
-    }
-  }
-
-  async _buyTicketFromOwner(event, ticket) {
-    try {
-      this._dismissTransactionError();
-      const tx = await event.contract.buyTicketFromUser(ticket.ticketID);
-      this.setState({ txBeingSent: tx.hash });
-      const receipt = await tx.wait();
-
-      if (receipt.status === 0) {
-        throw new Error("Transaction failed");
-      }
-
-      await this._updateBalance();
+      await this._getEventsData();
     } catch (error) {
       if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
         return;
@@ -971,6 +737,7 @@ export class Dapp extends React.Component {
       }
 
       await this._updateBalance();
+      await this._getEventsData();
     } catch (error) {
       if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
         return;
