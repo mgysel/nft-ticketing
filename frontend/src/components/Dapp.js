@@ -17,43 +17,17 @@ import { ConnectWallet } from "./error_handling/ConnectWallet";
 import { Loading } from "./error_handling/Loading";
 import { TransactionErrorMessage } from "./error_handling/TransactionErrorMessage";
 import { WaitingForTransactionMessage } from "./error_handling/WaitingForTransactionMessage";
+import { Navbar } from "./navbar/Navbar";
+
+// Routes
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Event Tabs
-import { CreateEvent } from "./tabs/CreateEvent.js";
-import { BuyTickets } from "./tabs/BuyTickets.js";
-import { SecondaryMarketTickets } from "./tabs/SecondaryMarketTickets.js";
-import { MyTickets } from "./tabs/MyTickets.js";
-import { MyEvents } from "./tabs/MyEvents.js";
-import { EntryGate } from "./tabs/EntryGate.js";
+import { EventOrganizer } from "./event_organizer/EventOrganizer.js";
+import { Attendee } from "./attendee/Attendee.js";
 
 import {
-  Heading,
   Flex,
-  Center,
-  Wrap,
-  WrapItem,
-  Button,
-  Text,
-  Form,
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
-  FormHelperText,
-  IconButton,
-  Icon,
-  Input,
-  InputGroup,
-  SimpleGrid,
-  Box,
-  VStack,
-  Stack,
-  Radio,
-  RadioGroup,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel
 } from "@chakra-ui/react";
 
 // This is the default id used by the Hardhat Network
@@ -93,9 +67,6 @@ export class Dapp extends React.Component {
       formPrice: 0,
       formCanBeResold: true,
       formRoyaltyPercent: 0,
-      // Styling
-      darkGreen: "#276749",
-      lightGreen: "#C6F6DF",
       // Events
       myEvents: [],
       eventStage: 0,
@@ -104,6 +75,10 @@ export class Dapp extends React.Component {
       // Reselling tickets
       resalePrice: 0,
       resaleTicketID: -1,
+      // Styling
+      darkGreen: "#276749",
+      lightGreen: "#C6F6DF",
+      navLinkHoverColor: 'gray.400',
     };
 
     this.state = this.initialState;
@@ -151,50 +126,10 @@ export class Dapp extends React.Component {
             mr="5%"
             direction="column"
           >
-            <nav className="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
-              <Heading ml={20} color="white">
-                TicketChain
-              </Heading>
-              <VStack spacing={2} alignItems="right">
-                <Box className="navbar-brand pb-0 mb-0" justify="right">
-                  Account: {this.state.selectedAddress.toString()}
-                </Box>
-                <Box className="navbar-brand pt-0 mt-0" justify="right">
-                  Balance: {this.state.balance.toString()} ETH
-                </Box>
-              </VStack>
-            </nav>
-            <Tabs 
-              mt="100px"
-              p="20px"
-              variant="soft-rounded"
-              colorScheme="green"
-              borderRadius="5px"
-              border="1px solid"
-              borderColor="gray.200"
-            >
-              <TabList>
-                  <Tab>
-                    Create Events
-                  </Tab>
-                  <Tab>
-                    Purchase Tickets
-                  </Tab>
-                  <Tab>
-                    Secondary Market Tickets
-                  </Tab>
-                  <Tab>
-                    My Tickets
-                  </Tab>
-                  <Tab>
-                    My Events
-                  </Tab>
-                  <Tab>
-                    Entry Gate
-                  </Tab>
-                </TabList>
-                <TabPanels>
-                <CreateEvent 
+            <Navbar state={this.state} setState={this.setState} />
+            <Routes>
+              <Route path="/" element={
+                <Attendee
                   state={this.state} 
                   setState={this.setState} 
                   dismissTransactionError={this._dismissTransactionError}
@@ -202,7 +137,9 @@ export class Dapp extends React.Component {
                   updateBalance={this._updateBalance}
                   getEventsData={this._getEventsData}
                 />
-                <BuyTickets 
+              }/>
+              <Route path="/event-organizers" element={
+                <EventOrganizer 
                   state={this.state} 
                   setState={this.setState} 
                   dismissTransactionError={this._dismissTransactionError}
@@ -210,40 +147,8 @@ export class Dapp extends React.Component {
                   updateBalance={this._updateBalance}
                   getEventsData={this._getEventsData}
                 />
-                <SecondaryMarketTickets 
-                  state={this.state} 
-                  setState={this.setState} 
-                  dismissTransactionError={this._dismissTransactionError}
-                  eventCreator={this._eventCreator}
-                  updateBalance={this._updateBalance}
-                  getEventsData={this._getEventsData}
-                />
-                <MyTickets 
-                  state={this.state} 
-                  setState={this.setState} 
-                  dismissTransactionError={this._dismissTransactionError}
-                  eventCreator={this._eventCreator}
-                  updateBalance={this._updateBalance}
-                  getEventsData={this._getEventsData}
-                />
-                <MyEvents 
-                  state={this.state} 
-                  setState={this.setState} 
-                  dismissTransactionError={this._dismissTransactionError}
-                  eventCreator={this._eventCreator}
-                  updateBalance={this._updateBalance}
-                  getEventsData={this._getEventsData}
-                />
-                <EntryGate 
-                  state={this.state} 
-                  setState={this.setState} 
-                  dismissTransactionError={this._dismissTransactionError}
-                  eventCreator={this._eventCreator}
-                  updateBalance={this._updateBalance}
-                  getEventsData={this._getEventsData}
-                />
-              </TabPanels>
-            </Tabs>
+              }/>
+            </Routes>
           </Flex>
         </div>
       </div>

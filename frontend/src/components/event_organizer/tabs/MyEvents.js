@@ -5,18 +5,18 @@ import { ethers } from "ethers";
 
 // We import the contract's artifacts and address here, as we are going to be
 // using them with ethers
-import EventArtifact from "../../contracts/Event.json";
-import EventCreatorArtifact from "../../contracts/EventCreator.json";
-import contractAddress from "../../contracts/contract-address.json";
+import EventArtifact from "../../../contracts/Event.json";
+import EventCreatorArtifact from "../../../contracts/EventCreator.json";
+import contractAddress from "../../../contracts/contract-address.json";
 
 // All the logic of this dapp is contained in the Dapp component.
 // These other components are just presentational ones: they don't have any
 // logic. They just render HTML.
-import { NoWalletDetected } from "../error_handling/NoWalletDetected";
-import { ConnectWallet } from "../error_handling/ConnectWallet";
-import { Loading } from "../error_handling/Loading";
-import { TransactionErrorMessage } from "../error_handling/TransactionErrorMessage";
-import { WaitingForTransactionMessage } from "../error_handling/WaitingForTransactionMessage";
+import { NoWalletDetected } from "../../error_handling/NoWalletDetected";
+import { ConnectWallet } from "../../error_handling/ConnectWallet";
+import { Loading } from "../../error_handling/Loading";
+import { TransactionErrorMessage } from "../../error_handling/TransactionErrorMessage";
+import { WaitingForTransactionMessage } from "../../error_handling/WaitingForTransactionMessage";
 
 import {
   Heading,
@@ -65,6 +65,12 @@ const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 // you how to keep your Dapp and contract's state in sync,  and how to send a
 // transaction.
 export class MyEvents extends React.Component {  
+  constructor(props) {
+    super(props);
+    console.log("PROPS: ", props);
+    console.log("THIS PROPS: ", this.props);
+  }
+
   async setEventStage(index) {
     console.log("*** Inside set event stage")
     try {
