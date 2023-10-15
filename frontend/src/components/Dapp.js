@@ -22,6 +22,9 @@ import { WaitingForTransactionMessage } from "./error_handling/WaitingForTransac
 import { CreateEvent } from "./tabs/CreateEvent.js";
 import { BuyTickets } from "./tabs/BuyTickets.js";
 import { SecondaryMarketTickets } from "./tabs/SecondaryMarketTickets.js";
+import { MyTickets } from "./tabs/MyTickets.js";
+import { MyEvents } from "./tabs/MyEvents.js";
+import { EntryGate } from "./tabs/EntryGate.js";
 
 import {
   Heading,
@@ -215,214 +218,30 @@ export class Dapp extends React.Component {
                   updateBalance={this._updateBalance}
                   getEventsData={this._getEventsData}
                 />
-                <TabPanel mt="15px" mb="15px" align="center">
-                  <Heading mb="25px">My Tickets</Heading>
-                  <SimpleGrid columns={4} spacing={10} mt="30px">
-                    { 
-                      this.state.events.map((event, index) => (
-                        event.myTicketsNum > 0 && 
-                          <Box 
-                            key={index}
-                            borderRadius="5px"
-                            border="1px solid"
-                            borderColor="gray.200"
-                            p="20px"
-                            width="20rem"
-                          >
-                            <Text isTruncated fontWeight="bold" fontSize="xl" mb="7px">Ticket for Event {event.name}</Text>
-                            <Text>Event: {event.name}</Text>
-                            <Text>Num Tickets: {event.myTicketsNum}</Text>
-                            <Text>Ticket IDs: {event.myTicketsID.join(", ")}</Text>
-                            <Box                       
-                              borderRadius="5px"
-                              border="1px solid"
-                              borderColor="gray.100"
-                              padding="10px"
-                              mt="10px"
-                            >
-                              <form>
-                                <Input
-                                  isRequired
-                                  id='resalePrice'
-                                  type='number'
-                                  size="md"
-                                  placeholder='Set Resale Price'
-                                  onChange={(e) => this.setState({"resalePrice": e.target.value})}
-                                  mb="0px"
-                                  mt="10px"
-                                  _placeholder={{ color: 'gray.500' }}
-                                />
-                                <Input
-                                  isRequired
-                                  id='resalePrice'
-                                  type='number'
-                                  size="md"
-                                  placeholder='Set Ticket ID'
-                                  onChange={(e) => this.setState({"resaleTicketID": e.target.value})}
-                                  mb="0px"
-                                  mt="10px"
-                                  _placeholder={{ color: 'gray.500' }}
-                                />
-                                <Button 
-                                  type='submit' 
-                                  color={this.state.darkGreen}
-                                  backgroundColor={this.state.lightGreen}
-                                  size="lg"
-                                  mt="10px"
-                                  width="210px"
-                                  onClick={(e) => {
-                                    e.preventDefault()
-                                    this._setTicketForSale(event, this.state.resaleTicketID, this.state.resalePrice);
-                                  }}
-                                >
-                                  Set Ticket For Sale
-                                </Button>
-                              </form>
-                            </Box>
-                            <Button 
-                              type='submit' 
-                              color={this.state.darkGreen}
-                              backgroundColor={this.state.lightGreen}
-                              size="lg"
-                              mt="10px"
-                              width="210px"
-                            >
-                              Withdraw Balance
-                            </Button>
-                          </Box>
-                      ))
-                    }
-                  </SimpleGrid>
-                </TabPanel>
-                <TabPanel mt="15px" mb="15px" align="center">
-                  <Heading mb="25px">My Events</Heading>
-                  <SimpleGrid columns={4} spacing={10} mt="30px">
-                    { 
-                      this.state.events.map((event, index) => (
-                        <Box 
-                          key={index} 
-                          borderRadius="5px"
-                          border="1px solid"
-                          borderColor="gray.200"
-                          p="20px" 
-                          width="20rem"
-                        >
-                          <Text isTruncated fontWeight="bold" fontSize="xl" mb="7px"> Event {index + 1}</Text>
-                          <Text>Event: {event.name}</Text>
-                          <Text>Balance: {event.ownerBalance}</Text>
-                          <Text>Number of Tickets Left: {event.numTicketsLeft}</Text>
-                          <Box                       
-                            borderRadius="5px"
-                            border="1px solid"
-                            borderColor="gray.100"
-                            padding="10px"
-                            mt="10px"
-                          >
-                            <RadioGroup 
-                              mb="10px"
-                              onChange={(e) => {
-                                event.stage = e;
-                                this.setState({eventStage: e});
-                              }} 
-                              value={event.stage.toString() == this.state.eventStage ? this.state.eventStage : event.stage.toString()}
-                              defaultValue={event.stage.toString()}
-                            >
-                              <Stack spacing={4} direction="column">
-                                <Radio value="0" mb="0">Prep</Radio>
-                                <Radio value="1">Active</Radio>
-                                <Radio value="2">Checkin Open</Radio>
-                                <Radio value="3">Cancelled</Radio>
-                                <Radio value="4">Closed</Radio>
-                              </Stack>
-                            </RadioGroup>
-                            <Button 
-                              type='submit' 
-                              color={this.state.darkGreen}
-                              backgroundColor={this.state.lightGreen}
-                              size="lg"
-                              mt="10px"
-                              width="210px"
-                              onClick={(e) => {
-                                e.preventDefault()
-                                this._setEventStage(index)
-                              }}
-                            >
-                              Set Event Stage
-                            </Button>
-                          </Box>
-                          <Button 
-                              type='submit' 
-                              color={this.state.darkGreen}
-                              backgroundColor={this.state.lightGreen}
-                              size="lg"
-                              mt="10px"
-                              width="210px"
-                            >
-                              Owner Withdraw
-                            </Button>
-                        </Box>
-                      ))
-                    }
-                  </SimpleGrid>
-              </TabPanel>
-              <TabPanel mt="15px" mb="15px" align="center">
-                  <Heading mb="25px">Entry Gate</Heading>
-                  <SimpleGrid columns={4} spacing={10} mt="30px">
-                    { 
-                      this.state.events.map((event, index) => (
-                        event.myTicketsNum > 0 && event.stage === 2 &&
-                          <Box 
-                            key={index}
-                            borderRadius="5px"
-                            border="1px solid"
-                            borderColor="gray.200"
-                            p="20px"
-                            width="20rem"
-                          >
-                            <Text isTruncated fontWeight="bold" fontSize="xl" mb="7px">Ticket for Event {event.name}</Text>
-                            <Text>Event: {event.name}</Text>
-                            <Text>Num Tickets: {event.myTicketsNum}</Text>
-                            <Text>Ticket IDs: {event.myTicketsID.join(", ")}</Text>
-                            <Box                       
-                              borderRadius="5px"
-                              border="1px solid"
-                              borderColor="gray.100"
-                              padding="10px"
-                              mt="10px"
-                            >
-                              <form>
-                                <Input
-                                  isRequired
-                                  id='eventStage'
-                                  type='number'
-                                  size="md"
-                                  placeholder='Set Ticket ID'
-                                  onChange={(e) => this.setState({ "usedTicketID": e.target.value})}
-                                  mb="0px"
-                                  mt="10px"
-                                  _placeholder={{ color: 'gray.500' }}
-                                />
-                                <Button 
-                                  type='submit' 
-                                  color={this.state.darkGreen}
-                                  backgroundColor={this.state.lightGreen}
-                                  size="lg"
-                                  mt="10px"
-                                  width="210px"
-                                  onClick={(e) => {
-                                    e.preventDefault()
-                                    this._setTicketToUsed(event, this.state.usedTicketID)
-                                  }}
-                                >
-                                  Use Ticket
-                                </Button>
-                              </form>
-                            </Box>
-                          </Box>
-                      ))
-                    }
-                  </SimpleGrid>
-                </TabPanel>
+                <MyTickets 
+                  state={this.state} 
+                  setState={this.setState} 
+                  dismissTransactionError={this._dismissTransactionError}
+                  eventCreator={this._eventCreator}
+                  updateBalance={this._updateBalance}
+                  getEventsData={this._getEventsData}
+                />
+                <MyEvents 
+                  state={this.state} 
+                  setState={this.setState} 
+                  dismissTransactionError={this._dismissTransactionError}
+                  eventCreator={this._eventCreator}
+                  updateBalance={this._updateBalance}
+                  getEventsData={this._getEventsData}
+                />
+                <EntryGate 
+                  state={this.state} 
+                  setState={this.setState} 
+                  dismissTransactionError={this._dismissTransactionError}
+                  eventCreator={this._eventCreator}
+                  updateBalance={this._updateBalance}
+                  getEventsData={this._getEventsData}
+                />
               </TabPanels>
             </Tabs>
           </Flex>
@@ -651,108 +470,4 @@ export class Dapp extends React.Component {
     this.setState({events: eventsData});
     console.log("STATE EVENTS DATA: ", this.state.events)
   }
-
-  async _createEvent(numTickets, price, canBeResold, royaltyPercent, name, symbol) {
-    try {
-      this._dismissTransactionError();
-
-      const tx = await this._eventCreator.createEvent(numTickets, price, canBeResold, royaltyPercent, name, symbol);
-      this.setState({ txBeingSent: tx.hash });
-      const receipt = await tx.wait();
-
-      if (receipt.status === 0) {
-        throw new Error("Transaction failed");
-      }
-
-      await this._updateBalance();
-      await this._getEventsData();
-    } catch (error) {
-      if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
-        return;
-      }
-      this.setState({ transactionError: error });
-    } finally {
-      this.setState({ txBeingSent: undefined });
-    }
-  }
-
-  async _setEventStage(index) {
-    console.log("*** Inside set event stage")
-    try {
-      this._dismissTransactionError();
-      const tx = await this.state.events[index].contract.setStage(parseInt(this.state.eventStage));
-      this.setState({ txBeingSent: tx.hash });
-      const receipt = await tx.wait();
-
-      if (receipt.status === 0) {
-        throw new Error("Transaction failed");
-      }
-      await this._updateBalance();
-      await this._getEventsData();
-    } catch (error) {
-      if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
-        return;
-      }
-      this.setState({ transactionError: error });
-    } finally {
-      this.setState({ txBeingSent: undefined });
-    }
-  }
-
-  async _setTicketForSale(event, ticketId, resalePrice) {
-    try {
-      this._dismissTransactionError();
-      const tx = await event.contract.setTicketForSale(ticketId, resalePrice);
-      this.setState({ txBeingSent: tx.hash });
-      const receipt = await tx.wait();
-
-      if (receipt.status === 0) {
-        throw new Error("Transaction failed");
-      }
-
-      await this._updateBalance();
-      await this._getEventsData();
-    } catch (error) {
-      if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
-        return;
-      }
-      this.setState({ transactionError: error });
-    } finally {
-      this.setState({ txBeingSent: undefined });
-    }
-  }
-
-  async _setTicketToUsed(event, ticketID) {
-    try {
-      this._dismissTransactionError();
-      console.log("Ticket ID: ", ticketID);
-      const tx = await event.contract.setTicketToUsed(ticketID);
-      console.log("TX: ", tx);
-      this.setState({ txBeingSent: tx.hash });
-      const receipt = await tx.wait();
-      console.log("Receipt: ", receipt);
-
-      if (receipt.status === 0) {
-        throw new Error("Transaction failed");
-      }
-
-      await this._updateBalance();
-      await this._getEventsData();
-    } catch (error) {
-      if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
-        return;
-      }
-      console.log("ERROR: ", error);
-      this.setState({ transactionError: error });
-    } finally {
-      this.setState({ txBeingSent: undefined });
-    }
-  }
-
-  // async _getEventsData() {
-  //   const events = await this._token.events();
-  //   const symbol = await this._token.symbol();
-
-  //   this.setState({ tokenData: { name, symbol } });
-  // }
 }
