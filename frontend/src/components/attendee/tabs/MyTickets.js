@@ -18,17 +18,25 @@ import {
 // This is an error code that indicates that the user canceled a transaction
 const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 
-// This component is in charge of doing these things:
-//   1. It connects to the user's wallet
-//   2. Initializes ethers and the Token contract
-//   3. Polls the user balance to keep it updated.
-//   4. Transfers tokens by sending transactions
-//   5. Renders the whole application
-//
-// Note that (3) and (4) are specific of this sample application, but they show
-// you how to keep your Dapp and contract's state in sync,  and how to send a
-// transaction.
 export class MyTickets extends React.Component {  
+  constructor(props) {
+    super(props);
+    
+    // Determine number of secondary market tickets
+    var hasTickets = false;
+    for (var i = 0; i < this.props.state.events.length; i++) {
+      if (this.props.state.events[i].myTicketsNum > 0) {
+        hasTickets = true;
+        break;
+      }
+    }
+
+    // Set number of secondary market tickets
+    this.state = {
+      hasTickets: hasTickets,
+    }
+  }
+  
   async setTicketForSale(event, ticketId, resalePrice) {
     try {
       this.props.dismissTransactionError();
@@ -58,13 +66,13 @@ export class MyTickets extends React.Component {
     <TabPanel mt="15px" mb="15px" align="center">
     <Heading mb="25px">My Tickets</Heading>
     {
-      this.props.state.events.length === 0 && (
+      !this.state.hasTickets && (
         <EmptyMessage message={`You don't have any tickets.\n Purchase tickets to have fun at our events!`} />
       )
     }
 
-    { this.props.state.events.length > 0 &&
-      <SimpleGrid columns={4} spacing={10} mt="30px">
+    { this.state.hasTickets &&
+      <SimpleGrid columns={3} spacing={5} mt="30px">
         { 
           this.props.state.events.map((event, index) => (
             event.myTicketsNum > 0 && 
@@ -74,13 +82,12 @@ export class MyTickets extends React.Component {
                 border="1px solid"
                 borderColor="gray.200"
                 p="20px"
-                width="20rem"
+                width="100%"
               >
-                <Text isTruncated fontWeight="bold" fontSize="xl" mb="7px">Ticket for Event {event.name}</Text>
-                <Text>Event: {event.name}</Text>
-                <Text>Num Tickets: {event.myTicketsNum}</Text>
-                <Text>Ticket IDs: {event.myTicketsID.join(", ")}</Text>
-                <Box                       
+                <Text pb={0} mb={1} isTruncated fontWeight="bold" fontSize="xl">Ticket for {event.name}</Text>
+                <Text pb={0} mb={1} >Num Tickets: {event.myTicketsNum}</Text>
+                <Text pb={0} mb={1} >Ticket IDs: {event.myTicketsID.join(", ")}</Text>
+                <Box
                   borderRadius="5px"
                   border="1px solid"
                   borderColor="gray.100"
@@ -116,7 +123,7 @@ export class MyTickets extends React.Component {
                       backgroundColor={this.props.state.lightGreen}
                       size="lg"
                       mt="10px"
-                      width="210px"
+                      width="100%"
                       onClick={(e) => {
                         e.preventDefault()
                         this.setTicketForSale(event, this.props.state.resaleTicketID, this.props.state.resalePrice);
@@ -126,16 +133,6 @@ export class MyTickets extends React.Component {
                     </Button>
                   </form>
                 </Box>
-                <Button 
-                  type='submit' 
-                  color={this.props.state.darkGreen}
-                  backgroundColor={this.props.state.lightGreen}
-                  size="lg"
-                  mt="10px"
-                  width="210px"
-                >
-                  Withdraw Balance
-                </Button>
               </Box>
           ))
         }

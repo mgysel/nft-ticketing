@@ -30,15 +30,24 @@ const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 export class MyEvents extends React.Component {  
   constructor(props) {
     super(props);
-    console.log("PROPS: ", props);
-    console.log("THIS PROPS: ", this.props);
+    
+    // Determine if owner has created any events
+    var hasEvents = false;
+    for (var i = 0; i < this.props.state.events.length; i++) {
+      if (this.props.state.events[i].owner.toLowerCase() === this.props.state.selectedAddress.toLowerCase()) {
+        hasEvents = true;
+        break;
+      }
+    }
+    this.state = {
+      hasEvents: hasEvents,
+    }
   }
 
-  async setEventStage(index) {
-    console.log("*** Inside set event stage")
+  async setEventStage(event, stage) {
     try {
-      this._dismissTransactionError();
-      const tx = await this.props.state.events[index].contract.setStage(parseInt(this.props.state.eventStage));
+      this.props.dismissTransactionError();
+      const tx = await event.contract.setStage(parseInt(stage));
       this.props.setState({ txBeingSent: tx.hash });
       const receipt = await tx.wait();
 
@@ -63,13 +72,13 @@ export class MyEvents extends React.Component {
     <TabPanel mt="15px" mb="15px" align="center">
       <Heading mb="25px">My Events</Heading>
       {
-        this.props.state.events.length === 0 && (
+        !this.state.hasEvents && (
           <EmptyMessage message={`You have not created any events yet!`} />
         )
       }
 
-      { this.props.state.events.length > 0 &&
-        <SimpleGrid columns={4} spacing={10} mt="30px">
+      { this.state.hasEvents &&
+        <SimpleGrid columns={3} spacing={5} mt="30px">
           { 
             this.props.state.events.map((event, index) => (
               <Box 
@@ -78,12 +87,11 @@ export class MyEvents extends React.Component {
                 border="1px solid"
                 borderColor="gray.200"
                 p="20px" 
-                width="20rem"
+                width="100%"
               >
-                <Text isTruncated fontWeight="bold" fontSize="xl" mb="7px"> Event {index + 1}</Text>
-                <Text>Event: {event.name}</Text>
-                <Text>Balance: {event.ownerBalance}</Text>
-                <Text>Number of Tickets Left: {event.numTicketsLeft}</Text>
+                <Text pb={0} mb={1} isTruncated fontWeight="bold" fontSize="xl"> Event: {event.name}</Text>
+                <Text pb={0} mb={1}>Balance: ${event.ownerBalance}</Text>
+                <Text pb={0} mb={1}>Tickets Remaining: {event.numTicketsLeft}</Text>
                 <Box
                   borderRadius="5px"
                   border="1px solid"
@@ -94,18 +102,16 @@ export class MyEvents extends React.Component {
                   <RadioGroup 
                     mb="10px"
                     onChange={(e) => {
-                      e.preventDefault()
                       this.props.setState({eventStage: e});
                     }} 
-                    value={event.stage.toString() == this.props.state.eventStage ? this.props.state.eventStage : event.stage.toString()}
                     defaultValue={event.stage.toString()}
                   >
                     <Stack spacing={4} direction="column">
-                      <Radio value="0" mb="0">Prep</Radio>
-                      <Radio value="1">Active</Radio>
-                      <Radio value="2">Checkin Open</Radio>
-                      <Radio value="3">Cancelled</Radio>
-                      <Radio value="4">Closed</Radio>
+                      <Radio value="0" m={0}>Prep</Radio>
+                      <Radio value="1" m={0}>Active</Radio>
+                      <Radio value="2" m={0}>Checkin Open</Radio>
+                      <Radio value="3" m={0}>Cancelled</Radio>
+                      <Radio value="4" m={0}>Closed</Radio>
                     </Stack>
                   </RadioGroup>
                   <Button 
@@ -113,26 +119,16 @@ export class MyEvents extends React.Component {
                     color={this.props.state.darkGreen}
                     backgroundColor={this.props.state.lightGreen}
                     size="lg"
-                    mt="10px"
-                    width="210px"
+                    width="100%"
                     onClick={(e) => {
                       e.preventDefault()
-                      this.setEventStage(index)
+                      this.setEventStage(event, this.props.state.eventStage)
                     }}
+                    mt={2}
                   >
                     Set Event Stage
                   </Button>
                 </Box>
-                <Button 
-                    type='submit' 
-                    color={this.props.state.darkGreen}
-                    backgroundColor={this.props.state.lightGreen}
-                    size="lg"
-                    mt="10px"
-                    width="210px"
-                  >
-                    Owner Withdraw
-                  </Button>
               </Box>
             ))
           }

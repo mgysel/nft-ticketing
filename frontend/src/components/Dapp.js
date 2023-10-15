@@ -25,6 +25,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 // Event Tabs
 import { EventOrganizer } from "./event_organizer/EventOrganizer.js";
 import { Attendee } from "./attendee/Attendee.js";
+import { Balance } from "./balance/Balance.js";
 
 import {
   Flex,
@@ -69,6 +70,7 @@ export class Dapp extends React.Component {
       formRoyaltyPercent: 0,
       // Events
       myEvents: [],
+      events: [],
       eventStage: 0,
       // Set ticket to used
       usedTicketID: -1,
@@ -140,6 +142,16 @@ export class Dapp extends React.Component {
               }/>
               <Route path="/event-organizers" element={
                 <EventOrganizer 
+                  state={this.state} 
+                  setState={this.setState} 
+                  dismissTransactionError={this._dismissTransactionError}
+                  eventCreator={this._eventCreator}
+                  updateBalance={this._updateBalance}
+                  getEventsData={this._getEventsData}
+                />
+              }/>
+              <Route path="/balance" element={
+                <Balance 
                   state={this.state} 
                   setState={this.setState} 
                   dismissTransactionError={this._dismissTransactionError}
@@ -303,6 +315,7 @@ export class Dapp extends React.Component {
   async _getEventsData() {
     console.log("*** Inside _getEventsData");
     const events = await this._eventCreator.getEvents();
+    console.log("Events: ", events);
     
     const eventsData = [];
     for (let i=0; i < events.length; i++) {
@@ -316,6 +329,7 @@ export class Dapp extends React.Component {
       let contractAddress = events[i];
       let owner = await thisEvent.owner();
       let ownerBalance = (await thisEvent.balances(owner)).toNumber();
+      let userBalance = (await thisEvent.balances(this.state.selectedAddress)).toNumber();
       let name = await thisEvent.name();
       let symbol = await thisEvent.symbol();
       let numTicketsLeft = (await thisEvent.numTicketsLeft()).toNumber();
@@ -357,6 +371,7 @@ export class Dapp extends React.Component {
         "contractAddress": contractAddress,
         "owner": owner,
         "ownerBalance": ownerBalance,
+        "userBalance": userBalance,
         "name": name,
         "symbol": symbol,
         "numTicketsLeft": numTicketsLeft,

@@ -66,6 +66,25 @@ const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 // you how to keep your Dapp and contract's state in sync,  and how to send a
 // transaction.
 export class SecondaryMarketTickets extends React.Component {  
+  constructor(props) {
+    super(props);
+    // Determine number of secondary market tickets
+    var hasSecondaryTickets = false;
+    for (var i = 0; i < this.props.state.events.length; i++) {
+      for (var j = 0; j < this.props.state.events[i].tickets.length; j++) {
+        if (this.props.state.events[i].tickets[j].status === 2) {
+          hasSecondaryTickets = true;
+          break;
+        }
+      }
+    }
+
+    // Set number of secondary market tickets
+    this.state = {
+      hasSecondaryTickets: hasSecondaryTickets,
+    }
+  }
+
   async buyTicketFromOwner(event, ticket) {
     try {
       this.props.dismissTransactionError();
@@ -142,12 +161,12 @@ export class SecondaryMarketTickets extends React.Component {
   <TabPanel mt="15px" mb="15px" align="center">
     <Heading mb="25px">Secondary Market Tickets</Heading>
     {
-        this.props.state.events.length === 0 && (
+        !this.state.hasSecondaryTickets && (
           <EmptyMessage message={`No secondary market tickets available.\n Come back when more tickets are up for sale!`} />
         )
     }
 
-    { this.props.state.events.length > 0 &&
+    { this.state.hasSecondaryTickets &&
       <SimpleGrid columns={4} spacing={10} mt="30px">
         { 
           this.props.state.events.map((event, indexEvent) => (

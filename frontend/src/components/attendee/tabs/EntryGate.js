@@ -16,6 +16,23 @@ import {
 const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 
 export class EntryGate extends React.Component {  
+  constructor(props) {
+    super(props);
+    
+    // Determine number of tickets that can be used for entry
+    var hasTicketsEntry = false;
+    for (var i = 0; i < this.props.state.events.length; i++) {
+      if (this.props.state.events[i].myTicketsNum > 0 && this.props.state.events[i].stage === 2) {
+        hasTicketsEntry = true;
+        break;
+      }
+    }
+
+    // Set number of secondary market tickets
+    this.state = {
+      hasTicketsEntry: hasTicketsEntry,
+    }
+  }
 
   async setTicketToUsed(event, ticketID) {
     try {
@@ -44,13 +61,13 @@ export class EntryGate extends React.Component {
     <TabPanel mt="15px" mb="15px" align="center">
       <Heading mb="25px">Event Entry</Heading>
       {
-        this.props.state.events.length === 0 && (
+        !this.state.hasTicketsEntry && (
           <EmptyMessage message={`You cannot enter an event until your tickets \n for an event are open for entry!`} />
         )
       }
 
-      { this.props.state.events.length > 0 &&
-        <SimpleGrid columns={4} spacing={10} mt="30px">
+      { this.state.hasTicketsEntry &&
+        <SimpleGrid columns={3} spacing={5} mt="30px">
           { 
             this.props.state.events.map((event, index) => (
               event.myTicketsNum > 0 && event.stage === 2 &&
@@ -60,12 +77,11 @@ export class EntryGate extends React.Component {
                   border="1px solid"
                   borderColor="gray.200"
                   p="20px"
-                  width="20rem"
+                  width="100%"
                 >
-                  <Text isTruncated fontWeight="bold" fontSize="xl" mb="7px">Ticket for Event {event.name}</Text>
-                  <Text>Event: {event.name}</Text>
-                  <Text>Num Tickets: {event.myTicketsNum}</Text>
-                  <Text>Ticket IDs: {event.myTicketsID.join(", ")}</Text>
+                  <Text pb={0} mb={1} isTruncated fontWeight="bold" fontSize="xl">Ticket for {event.name}</Text>
+                  <Text pb={0} mb={1}>Num Tickets: {event.myTicketsNum}</Text>
+                  <Text pb={0} mb={1}>Ticket IDs: {event.myTicketsID.join(", ")}</Text>
                   <Box                       
                     borderRadius="5px"
                     border="1px solid"
@@ -91,7 +107,7 @@ export class EntryGate extends React.Component {
                         backgroundColor={this.props.state.lightGreen}
                         size="lg"
                         mt="10px"
-                        width="210px"
+                        width="100%"
                         onClick={(e) => {
                           e.preventDefault()
                           this.setTicketToUsed(event, this.props.state.usedTicketID)

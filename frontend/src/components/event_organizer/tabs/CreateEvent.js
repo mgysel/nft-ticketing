@@ -146,7 +146,7 @@ export class CreateEvent extends React.Component {
               type='number'
               size="md"
               placeholder='Price'
-              onChange={(e) => this.props.setState({ formEventPrice: e.target.value })}
+              onChange={(e) => this.props.setState({ formPrice: e.target.value })}
               mb="10px"
               _placeholder={{ color: 'gray.500' }}
               w="450px"

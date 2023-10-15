@@ -74,12 +74,12 @@ export class BuyTickets extends React.Component {
 
       {
         this.props.state.events.length === 0 && (
-          <EmptyMessage message={`No events to purchase tickets for.\n Come back when more events have been created!`} />
+          <EmptyMessage message={`No events are actively selling tickets.\n Come back when more events have been created!`} />
         )
       }
 
       { this.props.state.events.length > 0 &&
-        <SimpleGrid columns={4} spacing={10} mt="30px">
+        <SimpleGrid columns={3} spacing={5} mt="30px">
           { 
             this.props.state.events.map((id, index) => (
                 id.stage !== 0 && id.stage !== 2 && id.stage !== 5 && (
@@ -88,16 +88,13 @@ export class BuyTickets extends React.Component {
                     border="1px solid"
                     borderColor="gray.200"
                     p="20px" 
-                    width="20rem"
+                    width="100%"
                   >
-                    <Text isTruncated fontWeight="bold" fontSize="xl" mb="7px"> Event {index + 1}</Text>
-                    <Text>Name: {id.eventName}</Text>
-                    <Text>Symbol: {id.eventSymbol}</Text>
-                    <Text>Number of Tickets: {id.numTicketsLeft}</Text>
-                    <Text>Price: {id.price}</Text>
-                    <Text>Can Be Resold?: {id.canBeResold.toString()}</Text>
-                    <Text>Royalty Percent: {id.royaltyPercent}</Text>
-                    <Text>Stage: {id.stage}</Text>
+                    <Text mb={0} pb={1} isTruncated fontWeight="bold" fontSize="xl"> Event: {id.name}</Text>
+                    <Text mb={0} pb={1}>Tickets Remaining: {id.numTicketsLeft}</Text>
+                    <Text mb={0} pb={1}>Price: ${id.price.toString()}</Text>
+                    <Text mb={0} pb={1}>Can Be Resold?: {id.canBeResold.toString()}</Text>
+                    <Text mb={0} pb={1}>Resale Royalty: {id.royaltyPercent}%</Text>
                     <Button 
                       type='submit' 
                       color={this.props.state.darkGreen}
@@ -108,6 +105,7 @@ export class BuyTickets extends React.Component {
                         e.preventDefault()
                         this.buyTicket(index) 
                       }}
+                      width='100%'
                     >
                         Buy Ticket
                     </Button>
