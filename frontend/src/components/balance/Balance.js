@@ -97,7 +97,7 @@ export class Balance extends React.Component {
                     width="100%"
                     onClick={(e) => {
                       e.preventDefault()
-                      this.withdrawBalance(event, this.props.state.eventStage)
+                      this.withdraw(event)
                     }}
                     mt={2}
                   >

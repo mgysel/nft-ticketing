@@ -44,12 +44,19 @@ export class BuyTickets extends React.Component {
     }
   }
   
-  async buyTicket(index) {
+  async buyTicket(event) {
+    console.log("*** Inside buyTicket");
+    console.log("EVENT: ", event);
+    console.log("event.price: ", ethers.utils.parseEther(event.price.toString()));
     try {
       this.props.dismissTransactionError();
-      const tx = await this.props.state.events[index].contract.buyTicket();
+      console.log("1");
+      
+      const tx = await event.contract.buyTicket({ value: ethers.utils.parseEther(event.price.toString()) });
+      console.log("TX: ", tx);
       this.props.setState({ txBeingSent: tx.hash });
       const receipt = await tx.wait();
+      console.log("Receipt: ", receipt);
 
       if (receipt.status === 0) {
         throw new Error("Transaction failed");
@@ -81,8 +88,8 @@ export class BuyTickets extends React.Component {
       { this.props.state.events.length > 0 &&
         <SimpleGrid columns={3} spacing={5} mt="30px">
           { 
-            this.props.state.events.map((id, index) => (
-                id.stage !== 0 && id.stage !== 2 && id.stage !== 5 && (
+            this.props.state.events.map((event, index) => (
+                event.stage !== 0 && event.stage !== 2 && event.stage !== 5 && (
                   <Box key={index}        
                     borderRadius="5px"
                     border="1px solid"
@@ -90,11 +97,11 @@ export class BuyTickets extends React.Component {
                     p="20px" 
                     width="100%"
                   >
-                    <Text mb={0} pb={1} isTruncated fontWeight="bold" fontSize="xl"> Event: {id.name}</Text>
-                    <Text mb={0} pb={1}>Tickets Remaining: {id.numTicketsLeft}</Text>
-                    <Text mb={0} pb={1}>Price: ${id.price.toString()}</Text>
-                    <Text mb={0} pb={1}>Can Be Resold?: {id.canBeResold.toString()}</Text>
-                    <Text mb={0} pb={1}>Resale Royalty: {id.royaltyPercent}%</Text>
+                    <Text mb={0} pb={1} isTruncated fontWeight="bold" fontSize="xl"> Event: {event.name}</Text>
+                    <Text mb={0} pb={1}>Tickets Remaining: {event.numTicketsLeft}</Text>
+                    <Text mb={0} pb={1}>Price: ${event.price.toString()}</Text>
+                    <Text mb={0} pb={1}>Can Be Resold?: {event.canBeResold.toString()}</Text>
+                    <Text mb={0} pb={1}>Resale Royalty: {event.royaltyPercent}%</Text>
                     <Button 
                       type='submit' 
                       color={this.props.state.darkGreen}
@@ -103,7 +110,7 @@ export class BuyTickets extends React.Component {
                       mt="13px"
                       onClick={(e) => {
                         e.preventDefault()
-                        this.buyTicket(index) 
+                        this.buyTicket(event) 
                       }}
                       width='100%'
                     >

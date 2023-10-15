@@ -328,8 +328,8 @@ export class Dapp extends React.Component {
       // Get event data
       let contractAddress = events[i];
       let owner = await thisEvent.owner();
-      let ownerBalance = (await thisEvent.balances(owner)).toNumber();
-      let userBalance = (await thisEvent.balances(this.state.selectedAddress)).toNumber();
+      let ownerBalance = ethers.utils.formatEther((await thisEvent.balances(owner)).toString());
+      let userBalance = ethers.utils.formatEther((await thisEvent.balances(this.state.selectedAddress)).toString());
       let name = await thisEvent.name();
       let symbol = await thisEvent.symbol();
       let numTicketsLeft = (await thisEvent.numTicketsLeft()).toNumber();
