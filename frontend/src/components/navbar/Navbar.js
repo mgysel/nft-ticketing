@@ -17,9 +17,20 @@ import { Link as RouterLink } from "react-router-dom";
 import { useHistory, useLocation } from 'react-router-dom';
 
 export class Navbar extends React.Component {  
+  constructor(props) {
+    super(props);
+    this.state = {
+      bgColor1: "gray.400",
+      bgColor2: "white",
+      bgColor3: "white",
+    }
+    console.log("PROPS: ", props);
+    console.log("STATE: ", this.state);
+  }
 
   // If everything is loaded, we render the application.
   render() {
+
   return (
     <nav className="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
       <VStack m={0} p={0} ml={5} spacing={0} alignItems="left">
@@ -40,12 +51,15 @@ export class Navbar extends React.Component {
                 to={'/'}
                 fontSize={'md'}
                 fontWeight={500}
-                color={'white'}
+                color={this.state.bgColor1}
                 _hover={{
                   textDecoration: 'none',
                   color: this.props.state.navLinkHoverColor,
                 }}
-                >
+                onClick={(e) => {
+                  this.setState({bgColor1: 'gray.400', bgColor2: 'white', bgColor3: 'white'});
+                }}
+              >
                 Attendees
               </Link>
             </PopoverTrigger>
@@ -54,19 +68,23 @@ export class Navbar extends React.Component {
         <Center>
           <Popover trigger={'hover'} placement={'bottom-start'}>
             <PopoverTrigger>
-              <Link
+              <Text
                 p={2}
                 as={RouterLink}
                 to={'/event-organizers'}
                 fontSize={'md'}
                 fontWeight={500}
-                color={'white'}
+                color={this.state.bgColor2}
                 _hover={{
                   textDecoration: 'none',
                   color: this.props.state.navLinkHoverColor,
-                }}>
+                }}
+                onClick={() => {
+                  this.setState({bgColor1: 'white', bgColor2: 'gray.400', bgColor3: 'white'});
+                }}
+              >
                 Event Organizers
-              </Link>
+              </Text>
             </PopoverTrigger>
           </Popover>
         </Center>
@@ -79,11 +97,15 @@ export class Navbar extends React.Component {
                 to={'/balance'}
                 fontSize={'md'}
                 fontWeight={500}
-                color={'white'}
+                color={this.state.bgColor3}
                 _hover={{
                   textDecoration: 'none',
                   color: this.props.state.navLinkHoverColor,
-                }}>
+                }}
+                onClick={() => {
+                  this.setState({bgColor1: 'white', bgColor2: 'white', bgColor3: 'gray.400'});
+                }}
+              >
                 Balance
               </Link>
             </PopoverTrigger>
