@@ -68,6 +68,10 @@ const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 export class SecondaryMarketTickets extends React.Component {  
   constructor(props) {
     super(props);
+
+    // this.props.updateBalance();
+    // this.props.getEventsData();
+
     // Determine number of secondary market tickets
     var hasSecondaryTickets = false;
     for (var i = 0; i < this.props.state.events.length; i++) {

@@ -65,6 +65,23 @@ const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 // you how to keep your Dapp and contract's state in sync,  and how to send a
 // transaction.
 export class CreateEvent extends React.Component {
+  constructor(props) {
+    super(props);
+    
+    // this.props.updateBalance();
+    // this.props.getEventsData();
+
+    this.state = {
+      // Create Event Form
+      formEventName: "",
+      formEventSymbol: "",
+      formNumTickets: '',
+      formPrice: '',
+      formCanBeResold: true,
+      formRoyaltyPercent: '',
+    }
+  }
+  
   async createEvent(numTickets, price, canBeResold, royaltyPercent, name, symbol) {
     try {
       this.props.dismissTransactionError();
@@ -98,13 +115,19 @@ export class CreateEvent extends React.Component {
             onSubmit={(e) => {
               e.preventDefault()
               this.createEvent(
-                this.props.state.formNumTickets, 
-                this.props.state.formPrice, 
-                this.props.state.formCanBeResold, 
-                this.props.state.formRoyaltyPercent, 
-                this.props.state.formEventName, 
-                this.props.state.formEventSymbol
+                this.state.formNumTickets, 
+                this.state.formPrice, 
+                this.state.formCanBeResold, 
+                this.state.formRoyaltyPercent, 
+                this.state.formEventName, 
+                this.state.formEventSymbol
               )
+              this.setState({ formEventName: '' });
+              this.setState({ formEventSymbol: '' });
+              this.setState({ formNumTickets: '' })
+              this.setState({ formPrice: '' });
+              this.setState({ formCanBeResold: true });
+              this.setState({ formRoyaltyPercent: '' });
             }}
           >
             <Input
@@ -112,8 +135,9 @@ export class CreateEvent extends React.Component {
               id='name'
               type='text'
               size="md"
+              value={this.state.formEventName}
               placeholder='Event name'
-              onChange={(e) => this.props.setState({ formEventName: e.target.value })}
+              onChange={(e) => this.setState({ formEventName: e.target.value })}
               mb="10px"
               _placeholder={{ color: 'gray.500' }}
               w="450px"
@@ -123,8 +147,9 @@ export class CreateEvent extends React.Component {
               id='symbol'
               type='text'
               size="md"
+              value={this.state.formEventSymbol}
               placeholder='Token symbol'
-              onChange={(e) => this.props.setState({ formEventSymbol: e.target.value })}
+              onChange={(e) => this.setState({ formEventSymbol: e.target.value })}
               mb="10px"
               _placeholder={{ color: 'gray.500' }}
               w="450px"
@@ -134,8 +159,9 @@ export class CreateEvent extends React.Component {
               id='numTickets'
               type='number'
               size="md"
+              value={this.state.formNumTickets}
               placeholder='Number of Tickets'
-              onChange={(e) => this.props.setState({ formNumTickets: e.target.value })}
+              onChange={(e) => this.setState({ formNumTickets: e.target.value })}
               mb="10px"
               _placeholder={{ color: 'gray.500' }}
               w="450px"
@@ -145,8 +171,9 @@ export class CreateEvent extends React.Component {
               id='price'
               type='number'
               size="md"
+              value={this.state.formPrice}
               placeholder='Price'
-              onChange={(e) => this.props.setState({ formPrice: e.target.value })}
+              onChange={(e) => this.setState({ formPrice: e.target.value })}
               mb="10px"
               _placeholder={{ color: 'gray.500' }}
               w="450px"
@@ -156,8 +183,8 @@ export class CreateEvent extends React.Component {
               _placeholder={{ color: 'gray.500' }}
               w="450px"
               h="40px"
-              onChange={(e) => this.props.setState({ formCanBeResold: e.target.value })}
-              value={this.props.state.formCanBeResold}
+              onChange={(e) => this.setState({ formCanBeResold: e.target.value })}
+              value={this.state.formCanBeResold}
               border="1px"
               borderRadius="5px"
               borderColor='gray.200'
@@ -181,8 +208,9 @@ export class CreateEvent extends React.Component {
               id='royaltyPercent'
               type='number'
               size="md"
+              value={this.state.formRoyaltyPercent}
               placeholder='Resale royalty (%)'
-              onChange={(e) => this.props.setState({ formRoyaltyPercent: e.target.value })}
+              onChange={(e) => this.setState({ formRoyaltyPercent: e.target.value })}
               mb="10px"
               _placeholder={{ color: 'gray.500' }}
               w="450px"

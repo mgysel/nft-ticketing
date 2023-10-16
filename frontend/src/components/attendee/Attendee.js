@@ -25,6 +25,12 @@ import {
 } from "@chakra-ui/react";
 
 export class Attendee extends React.Component {  
+  constructor(props) {
+    super(props);
+    
+    this.props.updateBalance();
+    this.props.getEventsData();
+  }
 
   // If everything is loaded, we render the application.
   render() {

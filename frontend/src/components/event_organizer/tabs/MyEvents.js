@@ -31,6 +31,9 @@ export class MyEvents extends React.Component {
   constructor(props) {
     super(props);
     
+    // this.props.updateBalance();
+    // this.props.getEventsData();
+    
     // Determine if owner has created any events
     var hasEvents = false;
     for (var i = 0; i < this.props.state.events.length; i++) {

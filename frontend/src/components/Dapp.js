@@ -57,17 +57,11 @@ export class Dapp extends React.Component {
       // The user's address and balance
       selectedAddress: undefined,
       balance: undefined,
+      provider: undefined,
       // The ID about transactions being sent, and any possible error with them
       txBeingSent: undefined,
       transactionError: undefined,
       networkError: undefined,
-      // Create Event Form
-      formEventName: "",
-      formEventSymbol: "",
-      formNumTickets: 0,
-      formPrice: 0,
-      formCanBeResold: true,
-      formRoyaltyPercent: 0,
       // Events
       myEvents: [],
       events: [],
@@ -134,7 +128,7 @@ export class Dapp extends React.Component {
                 <Attendee
                   state={this.state} 
                   setState={this.setState} 
-                  dismissTransactionError={this._dismissTransactionError}
+                  dismissTransactionError={this.dismissTransactionError}
                   eventCreator={this.eventCreator}
                   updateBalance={this.updateBalance}
                   getEventsData={this.getEventsData}
@@ -144,7 +138,7 @@ export class Dapp extends React.Component {
                 <EventOrganizer 
                   state={this.state} 
                   setState={this.setState} 
-                  dismissTransactionError={this._dismissTransactionError}
+                  dismissTransactionError={this.dismissTransactionError}
                   eventCreator={this.eventCreator}
                   updateBalance={this.updateBalance}
                   getEventsData={this.getEventsData}
@@ -154,7 +148,7 @@ export class Dapp extends React.Component {
                 <Balance 
                   state={this.state} 
                   setState={this.setState} 
-                  dismissTransactionError={this._dismissTransactionError}
+                  dismissTransactionError={this.dismissTransactionError}
                   eventCreator={this.eventCreator}
                   updateBalance={this.updateBalance}
                   getEventsData={this.getEventsData}
@@ -187,7 +181,6 @@ export class Dapp extends React.Component {
     // First we check the network
     this._checkNetwork();
 
-    console.log("SELECTED ADDRESS: ", selectedAddress);
     this._initialize(selectedAddress);
 
     // We reinitialize it whenever the user changes their account.
@@ -205,12 +198,22 @@ export class Dapp extends React.Component {
     });
   }
 
-  _initialize(userAddress) {
+  async _initialize(userAddress) {
     // This method initializes the dapp
 
     // We first store the user's address in the component's state
-    this.setState({
+    console.log("*** Inside initialize");
+    console.log("User address: ", userAddress);
+    console.log("Selected Address BEFORE: ", this.state.selectedAddress);
+
+    this.setState({ 
       selectedAddress: userAddress,
+      provider: new ethers.providers.Web3Provider(window.ethereum),
+    }, function() {
+      console.log("Selected Address AFTER: ", this.state.selectedAddress);
+      this.initializeEthers();
+      this.updateBalance();
+      this.getEventsData();
     });
 
     // Then, we initialize ethers, fetch the token's data, and start polling
@@ -218,22 +221,22 @@ export class Dapp extends React.Component {
 
     // Fetching the token data and the user's balance are specific to this
     // sample project, but you can reuse the same initialization pattern.
-    this._initializeEthers();
-    this._startPollingData();
-    console.log("GETTING EVENT DATA");
-    this.getEventsData();
+    // await this.initializeEthers();
+    // await this.updateBalance();
+    // await this.getEventsData();
+    // this._startPollingData();
   }
 
-  async _initializeEthers() {
+  async initializeEthers() {
     // We first initialize ethers by creating a provider using window.ethereum
-    this.provider = new ethers.providers.Web3Provider(window.ethereum);
+    console.log("*** Inside initializeEthers")
 
     // Initialize the Event Creator contract
     this.eventCreator = new ethers.Contract(
       // TODO: How to get Event Creator address
       contractAddress.EventCreator,
       EventCreatorArtifact.abi,
-      this.provider.getSigner(0)
+      this.state.provider.getSigner(0)
     );
   }
 
@@ -250,7 +253,7 @@ export class Dapp extends React.Component {
 
     // We run it once immediately so we don't have to wait for it
     this.updateBalance();
-    this.getEventsData()
+    this.getEventsData();
   }
 
   _stopPollingData() {
@@ -262,19 +265,17 @@ export class Dapp extends React.Component {
   // in the component state.
   async updateBalance() {
     console.log("*** Inside updateBalance");
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const balance = await provider.getBalance(this.state.selectedAddress).toString();
-    console.log("Balance: ", balance);
-    this.setState({ balance });
+    const balance = ethers.utils.formatEther(await this.state.provider.getBalance(this.state.selectedAddress));
+    this.setState({ balance: balance });
   }
 
   // This method just clears part of the state.
-  _dismissTransactionError() {
+  dismissTransactionError() {
     this.setState({ transactionError: undefined });
   }
 
   // This method just clears part of the state.
-  _dismissNetworkError() {
+  dismissNetworkError() {
     this.setState({ networkError: undefined });
   }
 
@@ -310,12 +311,8 @@ export class Dapp extends React.Component {
   }
 
   async getEventsData() {
-    console.log("*** Inside _getEventsData");
-    console.log("This: ", this);
-    console.log("This event creator: ", this.eventCreator);
+    console.log("*** Inside getEventsData");
     const events = await this.eventCreator.getEvents();
-    console.log("Events: ", events);
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
     
     const eventsData = [];
     for (let i=0; i < events.length; i++) {
@@ -323,7 +320,7 @@ export class Dapp extends React.Component {
       const thisEvent = new ethers.Contract(
         events[i],
         EventArtifact.abi,
-        provider.getSigner(0)
+        this.state.provider.getSigner(0)
       );
       // Get event data
       let contractAddress = events[i];

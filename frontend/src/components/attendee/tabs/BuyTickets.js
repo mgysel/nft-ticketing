@@ -39,9 +39,10 @@ const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 export class BuyTickets extends React.Component { 
   constructor(props) {
     super(props);
-    console.log("*** Inside buyTickets Constructor");
-    console.log("PROPS: ", props);
-    console.log("Get events data: ", this.props.getEventsData);
+    
+    // this.props.updateBalance();
+    // this.props.getEventsData();
+
     this.state = {
       message: "",
     }

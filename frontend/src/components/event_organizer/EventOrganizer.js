@@ -23,6 +23,14 @@ import {
 } from "@chakra-ui/react";
 
 export class EventOrganizer extends React.Component {  
+  constructor(props) {
+    super(props);
+    console.log("*** Inside EventOrganizer constructor");
+    console.log("Props: ", props);
+    
+    this.props.updateBalance();
+    this.props.getEventsData();
+  }
 
   // If everything is loaded, we render the application.
   render() {

@@ -17,6 +17,9 @@ const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 export class Balance extends React.Component {  
   constructor(props) {
     super(props);
+
+    this.props.updateBalance();
+    this.props.getEventsData();
     
     // Determine if owner has created any events
     var hasBalance = false;
