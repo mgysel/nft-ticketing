@@ -16,26 +16,6 @@ import {
 const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 
 export class EntryGate extends React.Component {  
-  constructor(props) {
-    super(props);
-
-    // this.props.updateBalance();
-    // this.props.getEventsData();
-    
-    // Determine number of tickets that can be used for entry
-    var hasTicketsEntry = false;
-    for (var i = 0; i < this.props.state.events.length; i++) {
-      if (this.props.state.events[i].myTicketsNum > 0 && this.props.state.events[i].stage === 2) {
-        hasTicketsEntry = true;
-        break;
-      }
-    }
-
-    // Set number of secondary market tickets
-    this.state = {
-      hasTicketsEntry: hasTicketsEntry,
-    }
-  }
 
   async setTicketToUsed(event, ticketID) {
     try {
@@ -64,12 +44,12 @@ export class EntryGate extends React.Component {
     <TabPanel mt="15px" mb="15px" align="center">
       <Heading mb="25px">Event Entry</Heading>
       {
-        !this.state.hasTicketsEntry && (
+        !this.props.state.hasTicketsEntry && (
           <EmptyMessage message={`You cannot enter an event until your tickets \n for an event are open for entry!`} />
         )
       }
 
-      { this.state.hasTicketsEntry &&
+      { this.props.state.hasTicketsEntry &&
         <SimpleGrid columns={3} spacing={5} mt="30px">
           { 
             this.props.state.events.map((event, index) => (

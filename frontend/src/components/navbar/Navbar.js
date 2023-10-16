@@ -19,11 +19,40 @@ import { useHistory, useLocation } from 'react-router-dom';
 export class Navbar extends React.Component {  
   constructor(props) {
     super(props);
-    this.state = {
-      bgColor1: "gray.400",
-      bgColor2: "white",
-      bgColor3: "white",
+
+    // Nav component colors
+    const color1 = 'white';
+    const color2 = 'gray.400';
+    const urlList = window.location.href.split('/');
+    const url = urlList[urlList.length - 1];
+    console.log("NAVBAR URL: ", url);
+    if (url === '') {
+      this.state = {
+        bgColor1: color2,
+        bgColor2: color1,
+        bgColor3: color1,
+      }
+    } else if (url === 'event-organizers') {
+      this.state = {
+        bgColor1: color1,
+        bgColor2: color2,
+        bgColor3: color1,
+      }
+    } else if (url === 'balance') {
+      this.state = {
+        bgColor1: color1,
+        bgColor2: color1,
+        bgColor3: color2,
+      }
+    } else {
+      this.state = {
+        bgColor1: color1,
+        bgColor2: color1,
+        bgColor3: color1,
+      }
     }
+
+
     console.log("PROPS: ", props);
     console.log("STATE: ", this.state);
   }

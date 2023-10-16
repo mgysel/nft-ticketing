@@ -28,24 +28,6 @@ const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 // you how to keep your Dapp and contract's state in sync,  and how to send a
 // transaction.
 export class MyEvents extends React.Component {  
-  constructor(props) {
-    super(props);
-    
-    // this.props.updateBalance();
-    // this.props.getEventsData();
-    
-    // Determine if owner has created any events
-    var hasEvents = false;
-    for (var i = 0; i < this.props.state.events.length; i++) {
-      if (this.props.state.events[i].owner.toLowerCase() === this.props.state.selectedAddress.toLowerCase()) {
-        hasEvents = true;
-        break;
-      }
-    }
-    this.state = {
-      hasEvents: hasEvents,
-    }
-  }
 
   async setEventStage(event, stage) {
     try {
@@ -75,12 +57,12 @@ export class MyEvents extends React.Component {
     <TabPanel mt="15px" mb="15px" align="center">
       <Heading mb="25px">My Events</Heading>
       {
-        !this.state.hasEvents && (
+        !this.props.state.hasEvents && (
           <EmptyMessage message={`You have not created any events yet!`} />
         )
       }
 
-      { this.state.hasEvents &&
+      { this.props.state.hasEvents &&
         <SimpleGrid columns={3} spacing={5} mt="30px">
           { 
             this.props.state.events.map((event, index) => (

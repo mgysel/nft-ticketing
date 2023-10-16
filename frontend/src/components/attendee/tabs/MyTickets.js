@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 // All the logic of this dapp is contained in the Dapp component.
 // These other components are just presentational ones: they don't have any
@@ -24,7 +24,11 @@ export class MyTickets extends React.Component {
 
     // this.props.updateBalance();
     // this.props.getEventsData();
-    
+    console.log("Inside MyTickets constructor");
+    console.log("THIS PROPS: ", this.props);
+  }
+
+  hasTickets = () => {
     // Determine number of secondary market tickets
     var hasTickets = false;
     for (var i = 0; i < this.props.state.events.length; i++) {
@@ -34,10 +38,7 @@ export class MyTickets extends React.Component {
       }
     }
 
-    // Set number of secondary market tickets
-    this.state = {
-      hasTickets: hasTickets,
-    }
+    return hasTickets;
   }
   
   async setTicketForSale(event, ticketId, resalePrice) {
@@ -69,12 +70,12 @@ export class MyTickets extends React.Component {
     <TabPanel mt="15px" mb="15px" align="center">
     <Heading mb="25px">My Tickets</Heading>
     {
-      !this.state.hasTickets && (
+      !this.props.state.hasTickets && (
         <EmptyMessage message={`You don't have any tickets.\n Purchase tickets to have fun at our events!`} />
       )
     }
 
-    { this.state.hasTickets &&
+    { this.props.state.hasTickets &&
       <SimpleGrid columns={3} spacing={5} mt="30px">
         { 
           this.props.state.events.map((event, index) => (

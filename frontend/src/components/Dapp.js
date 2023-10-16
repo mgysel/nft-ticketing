@@ -75,6 +75,11 @@ export class Dapp extends React.Component {
       darkGreen: "#276749",
       lightGreen: "#C6F6DF",
       navLinkHoverColor: 'gray.400',
+      // Tickets
+      hasEvents: false,
+      hasTickets: false,
+      hasTicketsEntry: false,
+      isSecondaryTickets: false,
     };
 
     this.state = this.initialState;
@@ -214,6 +219,7 @@ export class Dapp extends React.Component {
       this.initializeEthers();
       this.updateBalance();
       this.getEventsData();
+      // this._startPollingData();
     });
 
     // Then, we initialize ethers, fetch the token's data, and start polling
@@ -240,6 +246,120 @@ export class Dapp extends React.Component {
     );
   }
 
+  // The next two methods just read from the contract and store the results
+  // in the component state.
+  async updateBalance() {
+    console.log("*** Inside updateBalance");
+    const balance = ethers.utils.formatEther(await this.state.provider.getBalance(this.state.selectedAddress));
+    this.setState({ balance: balance });
+  }
+
+  async getEventsData() {
+    console.log("*** Inside getEventsData");
+    const events = await this.eventCreator.getEvents();
+    const eventsData = [];
+    for (let i=0; i < events.length; i++) {
+      // Upload event contract
+      const thisEvent = new ethers.Contract(
+        events[i],
+        EventArtifact.abi,
+        this.state.provider.getSigner(0)
+      );
+      // Get event data
+      let contractAddress = events[i];
+      let owner = await thisEvent.owner();
+      let ownerBalance = ethers.utils.formatEther((await thisEvent.balances(owner)).toString());
+      let userBalance = ethers.utils.formatEther((await thisEvent.balances(this.state.selectedAddress)).toString());
+      let name = await thisEvent.name();
+      let symbol = await thisEvent.symbol();
+      let numTicketsLeft = (await thisEvent.numTicketsLeft()).toNumber();
+      let price = (await thisEvent.price()).toNumber();
+      let canBeResold = await thisEvent.canBeResold();
+      let royaltyPercent = (await thisEvent.royaltyPercent()).toNumber();
+      let stage = await thisEvent.stage();
+      let myTickets = (await thisEvent.balanceOf(this.state.selectedAddress)).toNumber();
+      let numTicketsSold = (await thisEvent.numTickets()).toNumber() - (await thisEvent.numTicketsLeft()).toNumber();
+      // Get my/all tickets
+      let myTicketsID = [];
+      let tickets = [];
+      let secondaryTickets = [];
+      for (let j=0; j < numTicketsSold; j++) {
+        await thisEvent.tickets(j).then((ticket) => {
+          tickets.push({
+            "ticketID": j,
+            "resalePrice": ticket.resalePrice.toNumber(),
+            "status": ticket.status,
+          });
+          if (ticket.status === 2) {
+            secondaryTickets.push({
+              "ticketID": j,
+              "resalePrice": ticket.resalePrice.toNumber(),
+              "status": ticket.status,
+            });
+          }
+        })
+        await thisEvent.ownerOf(j).then(() => {
+          myTicketsID.push(j);
+        })
+      }
+      // Get registered buyers for each ticket 
+      for (let j=0; j < tickets.length; j++) {
+        await thisEvent.registeredBuyers(tickets[j].ticketID).then((buyers) => {
+          tickets[j].registeredBuyers = buyers;
+        })
+      }
+      if (myTickets > 0) {
+        this.setState({
+          hasTickets: true,
+        })
+      }
+      if (secondaryTickets.length > 0) {
+        this.setState({
+          isSecondaryTickets: true,
+        })
+      }
+      if (myTickets > 0 && stage === 2) {
+        this.setState({
+          hasTicketsEntry: true,
+        })
+      }
+      if (owner.toLowerCase() === this.state.selectedAddress.toLowerCase()) {
+        this.setState({
+          hasEvents: true,
+        })
+      } 
+
+      // Create event data object
+      let thisEventData = {
+        "contract": thisEvent,
+        "contractAddress": contractAddress,
+        "owner": owner,
+        "ownerBalance": ownerBalance,
+        "userBalance": userBalance,
+        "name": name,
+        "symbol": symbol,
+        "numTicketsLeft": numTicketsLeft,
+        "price": price,
+        "canBeResold": canBeResold,
+        "royaltyPercent": royaltyPercent,
+        "stage": stage,
+        "myTicketsNum": myTickets,
+        "myTicketsID": myTicketsID,
+        "secondaryTickets": secondaryTickets,
+        "tickets": tickets,
+      }
+      eventsData.push(thisEventData);
+    }
+
+    // Determine if user has tickets
+
+
+    console.log("EVENTS DATA: ", eventsData);
+    this.setState({events: eventsData});
+    console.log("STATE EVENTS DATA: ", this.state.events)
+  }
+
+
   // The next two methods are needed to start and stop polling data. While
   // the data being polled here is specific to this example, you can use this
   // pattern to read any data from your contracts.
@@ -248,8 +368,8 @@ export class Dapp extends React.Component {
   // don't need to poll it. If that's the case, you can just fetch it when you
   // initialize the app, as we do with the token data.
   _startPollingData() {
-    // this._pollDataInterval = setInterval(() => this._updateBalance(), 1000);
-    // this._pollEventsInterval = setInterval(() => this.getEventsData(), 1000);
+    this._pollDataInterval = setInterval(() => this.updateBalance(), 1000);
+    this._pollEventsInterval = setInterval(() => this.getEventsData(), 1000);
 
     // We run it once immediately so we don't have to wait for it
     this.updateBalance();
@@ -259,14 +379,6 @@ export class Dapp extends React.Component {
   _stopPollingData() {
     // clearInterval(this._pollDataInterval);
     this._pollDataInterval = undefined;
-  }
-
-  // The next two methods just read from the contract and store the results
-  // in the component state.
-  async updateBalance() {
-    console.log("*** Inside updateBalance");
-    const balance = ethers.utils.formatEther(await this.state.provider.getBalance(this.state.selectedAddress));
-    this.setState({ balance: balance });
   }
 
   // This method just clears part of the state.
@@ -308,83 +420,5 @@ export class Dapp extends React.Component {
     if (window.ethereum.networkVersion !== HARDHAT_NETWORK_ID) {
       this._switchChain();
     }
-  }
-
-  async getEventsData() {
-    console.log("*** Inside getEventsData");
-    const events = await this.eventCreator.getEvents();
-    
-    const eventsData = [];
-    for (let i=0; i < events.length; i++) {
-      // Upload event contract
-      const thisEvent = new ethers.Contract(
-        events[i],
-        EventArtifact.abi,
-        this.state.provider.getSigner(0)
-      );
-      // Get event data
-      let contractAddress = events[i];
-      let owner = await thisEvent.owner();
-      let ownerBalance = ethers.utils.formatEther((await thisEvent.balances(owner)).toString());
-      let userBalance = ethers.utils.formatEther((await thisEvent.balances(this.state.selectedAddress)).toString());
-      let name = await thisEvent.name();
-      let symbol = await thisEvent.symbol();
-      let numTicketsLeft = (await thisEvent.numTicketsLeft()).toNumber();
-      let price = (await thisEvent.price()).toNumber();
-      let canBeResold = await thisEvent.canBeResold();
-      let royaltyPercent = (await thisEvent.royaltyPercent()).toNumber();
-      let stage = await thisEvent.stage();
-      let myTickets = (await thisEvent.balanceOf(this.state.selectedAddress)).toNumber();
-      let myTicketsID = [];
-      let numTicketsSold = (await thisEvent.numTickets()).toNumber() - (await thisEvent.numTicketsLeft()).toNumber();
-      // Get my tickets
-      for (let j=0; j < numTicketsSold; j++) {
-        await thisEvent.ownerOf(j).then(() => {
-          myTicketsID.push(j);
-        })
-      }
-      // Get all tickets
-      let tickets = [];
-      for (let j=0; j < numTicketsSold; j++) {
-        await thisEvent.tickets(j).then((ticket) => {
-          tickets.push({
-            "ticketID": j,
-            "resalePrice": ticket.resalePrice.toNumber(),
-            "status": ticket.status,
-          });
-        })
-      }
-      // Get registered buyers for each ticket 
-      for (let j=0; j < tickets.length; j++) {
-        await thisEvent.registeredBuyers(tickets[j].ticketID).then((buyers) => {
-          tickets[j].registeredBuyers = buyers;
-        })
-      }
-
-      console.log("TICKETS: ", tickets);
-      // Create event data object
-      let thisEventData = {
-        "contract": thisEvent,
-        "contractAddress": contractAddress,
-        "owner": owner,
-        "ownerBalance": ownerBalance,
-        "userBalance": userBalance,
-        "name": name,
-        "symbol": symbol,
-        "numTicketsLeft": numTicketsLeft,
-        "price": price,
-        "canBeResold": canBeResold,
-        "royaltyPercent": royaltyPercent,
-        "stage": stage,
-        "myTicketsNum": myTickets,
-        "myTicketsID": myTicketsID,
-        "tickets": tickets,
-      }
-      eventsData.push(thisEventData);
-    }
-
-    console.log("EVENTS DATA: ", eventsData);
-    this.setState({events: eventsData});
-    console.log("STATE EVENTS DATA: ", this.state.events)
   }
 }
