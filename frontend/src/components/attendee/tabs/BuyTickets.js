@@ -39,6 +39,9 @@ const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 export class BuyTickets extends React.Component { 
   constructor(props) {
     super(props);
+    console.log("*** Inside buyTickets Constructor");
+    console.log("PROPS: ", props);
+    console.log("Get events data: ", this.props.getEventsData);
     this.state = {
       message: "",
     }
@@ -46,17 +49,11 @@ export class BuyTickets extends React.Component {
   
   async buyTicket(event) {
     console.log("*** Inside buyTicket");
-    console.log("EVENT: ", event);
-    console.log("event.price: ", ethers.utils.parseEther(event.price.toString()));
     try {
       this.props.dismissTransactionError();
-      console.log("1");
-      
       const tx = await event.contract.buyTicket({ value: ethers.utils.parseEther(event.price.toString()) });
-      console.log("TX: ", tx);
       this.props.setState({ txBeingSent: tx.hash });
       const receipt = await tx.wait();
-      console.log("Receipt: ", receipt);
 
       if (receipt.status === 0) {
         throw new Error("Transaction failed");
@@ -67,6 +64,7 @@ export class BuyTickets extends React.Component {
       if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
         return;
       }
+      console.log("TX ERROR: ", error);
       this.props.setState({ transactionError: error });
     } finally {
       this.props.setState({ txBeingSent: undefined });

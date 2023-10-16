@@ -135,9 +135,9 @@ export class Dapp extends React.Component {
                   state={this.state} 
                   setState={this.setState} 
                   dismissTransactionError={this._dismissTransactionError}
-                  eventCreator={this._eventCreator}
-                  updateBalance={this._updateBalance}
-                  getEventsData={this._getEventsData}
+                  eventCreator={this.eventCreator}
+                  updateBalance={this.updateBalance}
+                  getEventsData={this.getEventsData}
                 />
               }/>
               <Route path="/event-organizers" element={
@@ -145,9 +145,9 @@ export class Dapp extends React.Component {
                   state={this.state} 
                   setState={this.setState} 
                   dismissTransactionError={this._dismissTransactionError}
-                  eventCreator={this._eventCreator}
-                  updateBalance={this._updateBalance}
-                  getEventsData={this._getEventsData}
+                  eventCreator={this.eventCreator}
+                  updateBalance={this.updateBalance}
+                  getEventsData={this.getEventsData}
                 />
               }/>
               <Route path="/balance" element={
@@ -155,9 +155,9 @@ export class Dapp extends React.Component {
                   state={this.state} 
                   setState={this.setState} 
                   dismissTransactionError={this._dismissTransactionError}
-                  eventCreator={this._eventCreator}
-                  updateBalance={this._updateBalance}
-                  getEventsData={this._getEventsData}
+                  eventCreator={this.eventCreator}
+                  updateBalance={this.updateBalance}
+                  getEventsData={this.getEventsData}
                 />
               }/>
             </Routes>
@@ -221,26 +221,19 @@ export class Dapp extends React.Component {
     this._initializeEthers();
     this._startPollingData();
     console.log("GETTING EVENT DATA");
-    this._getEventsData();
+    this.getEventsData();
   }
 
   async _initializeEthers() {
     // We first initialize ethers by creating a provider using window.ethereum
-    this._provider = new ethers.providers.Web3Provider(window.ethereum);
+    this.provider = new ethers.providers.Web3Provider(window.ethereum);
 
     // Initialize the Event Creator contract
-    this._eventCreator = new ethers.Contract(
+    this.eventCreator = new ethers.Contract(
       // TODO: How to get Event Creator address
       contractAddress.EventCreator,
       EventCreatorArtifact.abi,
-      this._provider.getSigner(0)
-    );
-
-    // Initialize the Event contract
-    this._event = new ethers.Contract(
-      contractAddress.Event,
-      EventArtifact.abi,
-      this._provider.getSigner(0)
+      this.provider.getSigner(0)
     );
   }
 
@@ -252,22 +245,26 @@ export class Dapp extends React.Component {
   // don't need to poll it. If that's the case, you can just fetch it when you
   // initialize the app, as we do with the token data.
   _startPollingData() {
-    this._pollDataInterval = setInterval(() => this._updateBalance(), 1000);
+    // this._pollDataInterval = setInterval(() => this._updateBalance(), 1000);
+    // this._pollEventsInterval = setInterval(() => this.getEventsData(), 1000);
 
     // We run it once immediately so we don't have to wait for it
-    this._updateBalance();
-    this._getEventsData()
+    this.updateBalance();
+    this.getEventsData()
   }
 
   _stopPollingData() {
-    clearInterval(this._pollDataInterval);
+    // clearInterval(this._pollDataInterval);
     this._pollDataInterval = undefined;
   }
 
   // The next two methods just read from the contract and store the results
   // in the component state.
-  async _updateBalance() {
-    const balance = ethers.utils.formatEther((await this._provider.getBalance(this.state.selectedAddress)).toString());
+  async updateBalance() {
+    console.log("*** Inside updateBalance");
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const balance = await provider.getBalance(this.state.selectedAddress).toString();
+    console.log("Balance: ", balance);
     this.setState({ balance });
   }
 
@@ -312,10 +309,13 @@ export class Dapp extends React.Component {
     }
   }
 
-  async _getEventsData() {
+  async getEventsData() {
     console.log("*** Inside _getEventsData");
-    const events = await this._eventCreator.getEvents();
+    console.log("This: ", this);
+    console.log("This event creator: ", this.eventCreator);
+    const events = await this.eventCreator.getEvents();
     console.log("Events: ", events);
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
     
     const eventsData = [];
     for (let i=0; i < events.length; i++) {
@@ -323,7 +323,7 @@ export class Dapp extends React.Component {
       const thisEvent = new ethers.Contract(
         events[i],
         EventArtifact.abi,
-        this._provider.getSigner(0)
+        provider.getSigner(0)
       );
       // Get event data
       let contractAddress = events[i];
