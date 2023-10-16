@@ -18,6 +18,9 @@ const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 export class EntryGate extends React.Component {  
 
   async setTicketToUsed(event, ticketID) {
+    console.log("*** setTicketToUsed ***");
+    console.log("event: ", event);
+    console.log("ticketID: ", ticketID);
     try {
       this.props.dismissTransactionError();
       const tx = await event.contract.setTicketToUsed(ticketID);

@@ -116,11 +116,18 @@ export class SecondaryMarketTickets extends React.Component {
   }
 
   async registerToBuy(event, ticket) {
+    console.log("*** Inside registerToBuy");
+    console.log("Event: ", event);
+    console.log("Ticket: ", ticket);
     try {
+      console.log("0");
       this.props.dismissTransactionError();
+      console.log("1");
       const tx = await event.contract.registerAsBuyer(ticket.ticketID);
+      console.log("TX: ", tx);
       this.props.setState({ txBeingSent: tx.hash });
       const receipt = await tx.wait();
+      console.log("Receipt: ", receipt);
 
       if (receipt.status === 0) {
         throw new Error("Transaction failed");
@@ -129,6 +136,7 @@ export class SecondaryMarketTickets extends React.Component {
       await this.props.getEventsData();
     } catch (error) {
       if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
+        console.log("ERROR: ", error);
         return;
       }
       this.props.setState({ transactionError: error });
@@ -149,7 +157,7 @@ export class SecondaryMarketTickets extends React.Component {
     }
 
     { this.props.state.hasSecondaryTickets &&
-      <SimpleGrid columns={4} spacing={10} mt="30px">
+      <SimpleGrid columns={3} spacing={5} mt="30px">
         { 
           this.props.state.events.map((event, indexEvent) => (
               event.tickets.map((ticket, indexTicket) => (
@@ -160,18 +168,19 @@ export class SecondaryMarketTickets extends React.Component {
                     border="1px solid"
                     borderColor="gray.200"
                     p="20px" 
-                    width="20rem"
+                    width="100%"
                   >
-                    <Text isTruncated fontWeight="bold" fontSize="xl" mb="7px"> Event {event.name}</Text>
-                    <Text>Event: {event.name}</Text>
-                    <Text>Ticket ID: {ticket.ticketID}</Text>
+                    <Text pb={0} mb={1} isTruncated fontWeight="bold" fontSize="xl"> Event {event.name}</Text>
+                    <Text pb={0} mb={1}>Event: {event.name}</Text>
+                    <Text pb={0} mb={1}>Price: ${ticket.resalePrice}</Text>
+                    <Text pb={0} mb={1}>Ticket ID: {ticket.ticketID}</Text>
                     <Button 
                       type='submit' 
                       color={this.props.state.darkGreen}
                       backgroundColor={this.props.state.lightGreen}
                       size="lg"
                       mt="13px"
-                      width="220px"
+                      width="100%"
                       onClick={(e) => {
                         e.preventDefault()
                         this.registerToBuy(event, ticket)
@@ -185,7 +194,7 @@ export class SecondaryMarketTickets extends React.Component {
                       backgroundColor={this.props.state.lightGreen}
                       size="lg"
                       mt="13px"
-                      width="220px"
+                      width="100%"
                       onClick={(e) => {
                         e.preventDefault()
                         this.approveSale(event, ticket)
@@ -199,13 +208,13 @@ export class SecondaryMarketTickets extends React.Component {
                       backgroundColor={this.props.state.lightGreen}
                       size="lg"
                       mt="13px"
-                      width="220px"
+                      width="100%"
                       onClick={(e) => {
                         e.preventDefault()
                         this.buyTicketFromOwner(event, ticket)
                       }}
                     >
-                        Buy Ticket From Owner
+                        Buy Ticket
                     </Button>
                   </Box>
             )

@@ -62,10 +62,10 @@ export class BuyTickets extends React.Component {
       await this.props.updateBalance();
       await this.props.getEventsData();
     } catch (error) {
+      console.log("TX ERROR: ", error);
       if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
         return;
       }
-      console.log("TX ERROR: ", error);
       this.props.setState({ transactionError: error });
     } finally {
       this.props.setState({ txBeingSent: undefined });

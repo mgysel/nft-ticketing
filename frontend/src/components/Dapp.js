@@ -79,7 +79,7 @@ export class Dapp extends React.Component {
       hasEvents: false,
       hasTickets: false,
       hasTicketsEntry: false,
-      isSecondaryTickets: false,
+      hasSecondaryTickets: false,
     };
 
     this.state = this.initialState;
@@ -315,7 +315,7 @@ export class Dapp extends React.Component {
       }
       if (secondaryTickets.length > 0) {
         this.setState({
-          isSecondaryTickets: true,
+          hasSecondaryTickets: true,
         })
       }
       if (myTickets > 0 && stage === 2) {

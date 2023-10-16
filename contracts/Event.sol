@@ -268,7 +268,7 @@ contract Event is ERC721 {
      * @dev register as buyer
      */
     function registerAsBuyer(uint ticketID) public requiredStage(Stages.Active){
-        require(registeredBuyers[ticketID] != msg.sender, "");
+        require(registeredBuyers[ticketID] != msg.sender, "register error");
 
         registeredBuyers[ticketID] = msg.sender;
     }
@@ -297,7 +297,7 @@ contract Event is ERC721 {
 
     // Requires stage to be _stage
     modifier requiredStage(Stages _stage) {
-        require(stage == _stage, "");
+        require(stage == _stage, "wrong stage");
         _;
     }
 
