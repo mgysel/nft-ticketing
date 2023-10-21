@@ -286,6 +286,7 @@ export class Dapp extends React.Component {
       let tickets = [];
       let myTickets = [];
       let secondaryTickets = [];
+      let usedTickets = [];
       for (let j=0; j < numTicketsSold; j++) {
         console.log("J: ", j);
         let ticket = await thisEvent.tickets(j);
@@ -302,7 +303,12 @@ export class Dapp extends React.Component {
             "resalePrice": ticket.resalePrice.toNumber(),
             "status": ticket.status,
           });
-          myUsedTicketsNum = myUsedTicketsNum + 1;
+        } else if (ticket.status === 1) {
+          usedTickets.push({
+            "ticketID": j,
+            "resalePrice": ticket.resalePrice.toNumber(),
+            "status": ticket.status,
+          });
         }
         let owner = await thisEvent.ownerOf(j);
         console.log("Owner Of Ticket: ", owner);
@@ -338,7 +344,7 @@ export class Dapp extends React.Component {
           hasEvents: true,
         })
       } 
-      if (myUsedTicketsNum > 0) {
+      if (usedTickets.length > 0) {
         this.setState({
           hasTicketsUsed: true,
         })

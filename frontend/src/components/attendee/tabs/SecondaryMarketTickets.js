@@ -169,7 +169,7 @@ export class SecondaryMarketTickets extends React.Component {
                   >
                     <Text pb={0} mb={1} isTruncated fontWeight="bold" fontSize="xl"> Event {event.name}</Text>
                     <Text pb={0} mb={1}>Event: {event.name}</Text>
-                    <Text pb={0} mb={1}>Price: ${(ticket.resalePrice / (10 ** 9)).toString()} Gwei</Text>
+                    <Text pb={0} mb={1}>Price: ${(ticket.resalePrice /  (10 ** 9)).toString()} Gwei</Text>
                     <Text pb={0} mb={1}>Ticket ID: {ticket.ticketID}</Text>
                     <Button 
                       type='submit' 

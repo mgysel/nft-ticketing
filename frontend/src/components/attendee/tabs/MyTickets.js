@@ -5,6 +5,8 @@ import React, { useEffect } from "react";
 // logic. They just render HTML.
 import { EmptyMessage } from "../../error_handling/EmptyMessage";
 
+import { ethers } from "ethers";
+
 import {
   Heading,
   Button,
@@ -24,6 +26,9 @@ export class MyTickets extends React.Component {
 
     // this.props.updateBalance();
     // this.props.getEventsData();
+    this.state = {
+      resaleTicketPrice: "",
+    }
     console.log("Inside MyTickets constructor");
     console.log("THIS PROPS: ", this.props);
   }
@@ -42,9 +47,12 @@ export class MyTickets extends React.Component {
   }
   
   async setTicketForSale(event, ticketId, resalePrice) {
+    console.log("*** Inside setTicketForSale");
+    console.log("Resale Price: ", resalePrice);
     try {
       this.props.dismissTransactionError();
-      const tx = await event.contract.setTicketForSale(ticketId, resalePrice);
+      const gweiPrice = ethers.BigNumber.from(resalePrice.toString()).mul(ethers.BigNumber.from(10).pow(9));
+      const tx = await event.contract.setTicketForSale(ticketId, gweiPrice);
       this.props.setState({ txBeingSent: tx.hash });
       const receipt = await tx.wait();
 
@@ -127,18 +135,8 @@ export class MyTickets extends React.Component {
                       type='number'
                       size="md"
                       placeholder='Set Resale Price'
-                      onChange={(e) => this.props.setState({"resalePrice": e.target.value})}
-                      mb="0px"
-                      mt="10px"
-                      _placeholder={{ color: 'gray.500' }}
-                    />
-                    <Input
-                      isRequired
-                      id='resalePrice'
-                      type='number'
-                      size="md"
-                      placeholder='Set Ticket ID'
-                      onChange={(e) => this.props.setState({"resaleTicketID": e.target.value})}
+                      value = {this.state.resaleTicketPrice}
+                      onChange={(e) => this.setState({resaleTicketPrice: e.target.value})}
                       mb="0px"
                       mt="10px"
                       _placeholder={{ color: 'gray.500' }}
@@ -152,26 +150,16 @@ export class MyTickets extends React.Component {
                       width="100%"
                       onClick={(e) => {
                         e.preventDefault()
-                        this.setTicketForSale(event, this.props.state.resaleTicketID, this.props.state.resalePrice);
+                        this.setTicketForSale(event, ticket.ticketID, this.state.resaleTicketPrice);
+                        this.setState({resaleTicketPrice: ""});
                       }}
                     >
                       Set Ticket For Sale
                     </Button>
                   </form>
                 }
-                { event.stage === 2 && ticket.status !== 2 &&
+                { event.stage === 2 && ticket.status !== 1 &&
                   <form>
-                  <Input
-                    isRequired
-                    id='eventStage'
-                    type='number'
-                    size="md"
-                    placeholder='Set Ticket ID'
-                    onChange={(e) => this.props.setState({ "usedTicketID": e.target.value})}
-                    mb="0px"
-                    mt="10px"
-                    _placeholder={{ color: 'gray.500' }}
-                  />
                   <Button 
                     type='submit' 
                     color={this.props.state.darkGreen}
@@ -181,7 +169,7 @@ export class MyTickets extends React.Component {
                     width="100%"
                     onClick={(e) => {
                       e.preventDefault()
-                      this.setTicketToUsed(event, parseInt(this.props.state.usedTicketID))
+                      this.setTicketToUsed(event, ticket.ticketID)
                     }}
                   >
                     Use Ticket
@@ -197,7 +185,7 @@ export class MyTickets extends React.Component {
       </SimpleGrid>
     }
 
-    <Heading mt='25px'>Past Events</Heading>
+    <Heading mt='25px'>Used Tickets</Heading>
     {
       !this.props.state.hasUsedTickets && (
         <EmptyMessage message={`You haven't used any tickets.\n Purchase/use tickets to have fun at our events!`} />
@@ -208,7 +196,7 @@ export class MyTickets extends React.Component {
       <SimpleGrid columns={3} spacing={5} mt="30px">
         { 
           this.props.state.events.map((event, indexEvent) => (
-            event.stage === 4 && event.myTickets.map((ticket, indexTicket) => (
+            event.stage === 4 && event.usedTickets.map((ticket, indexTicket) => (
             <Box 
               key={indexEvent}
               borderRadius="5px"
@@ -219,15 +207,6 @@ export class MyTickets extends React.Component {
             >
               <Text pb={0} mb={1} isTruncated fontWeight="bold" fontSize="xl">Ticket for {event.name}</Text>
               <Text pb={0} mb={1} >Ticket ID: {ticket.ticketID}</Text>
-              <Box
-                borderRadius="5px"
-                border="1px solid"
-                borderColor="gray.100"
-                padding="10px"
-                mt="10px"
-              >
-
-              </Box>
             </Box>
             ))
           ))
