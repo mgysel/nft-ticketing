@@ -54,9 +54,6 @@ export class Attendee extends React.Component {
         <Tab>
           My Tickets
         </Tab>
-        <Tab>
-          Entry Gate
-        </Tab>
       </TabList>
       <TabPanels>
       <BuyTickets 
@@ -76,14 +73,6 @@ export class Attendee extends React.Component {
         getEventsData={this.props.getEventsData}
       />
       <MyTickets
-        state={this.props.state} 
-        setState={this.props.setState} 
-        dismissTransactionError={this.props.dismissTransactionError}
-        eventCreator={this.props.eventCreator}
-        updateBalance={this.props.updateBalance}
-        getEventsData={this.props.getEventsData}
-      />
-      <EntryGate 
         state={this.props.state} 
         setState={this.props.setState} 
         dismissTransactionError={this.props.dismissTransactionError}

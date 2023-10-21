@@ -179,12 +179,13 @@ contract Event is ERC721 {
                                                                     ownsTicket(ticketID) {
 		// Validate that user has a ticket they own and it is valid
         require(tickets[ticketID].status == TicketStatus.Valid, "");
+        require(ownerOf(ticketID) == msg.sender, "");
     
         // Ticket is valid so mark it as used
         tickets[ticketID].status = TicketStatus.Used;
 
         // Burn the Token
-        _burn(ticketID); 
+        // _burn(ticketID); 
         
         // Raise event which Gate Management system can consume then
         emit TicketUsed(address(this), ticketID, name());
