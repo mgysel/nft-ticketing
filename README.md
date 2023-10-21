@@ -1,15 +1,10 @@
-# Hardhat Boilerplate
+# TicketChain
 
-This repository contains a sample project that you can use as the starting point
-for your Ethereum project. It's also a great fit for learning the basics of
-smart contract development.
+TicketChain is an NFT event ticketing system that allows event organizers to create events and customers to purchase tickets, all on the Ethereum blockchain. This was originally built for UNSW's Software Architecture for Blockchain-based Applications, but it has since been expanded.
 
-This project is intended to be used with the
-[Hardhat Beginners Tutorial](https://hardhat.org/tutorial), but you should be
-able to follow it by yourself by reading the README and exploring its
-`contracts`, `tests`, `scripts` and `frontend` directories.
+## Installation and Dependencies
 
-## Quick start
+### Quick start
 
 The first things you need to do are cloning this repository and installing its
 dependencies:
@@ -45,7 +40,7 @@ Open [http://localhost:3000/](http://localhost:3000/) to see your Dapp. You will
 need to have [Coinbase Wallet](https://www.coinbase.com/wallet) or [Metamask](https://metamask.io) installed and listening to
 `localhost 8545`.
 
-## User Guide
+### User Guide
 
 You can find detailed instructions on using this repository and many tips in [its documentation](https://hardhat.org/tutorial).
 
@@ -57,7 +52,7 @@ You can find detailed instructions on using this repository and many tips in [it
 
 For a complete introduction to Hardhat, refer to [this guide](https://hardhat.org/getting-started/#overview).
 
-## What's Included?
+### What's Included?
 
 This repository uses our recommended hardhat setup, by using our [`@nomicfoundation/hardhat-toolbox`](https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-toolbox). When you use this plugin, you'll be able to:
 
@@ -76,15 +71,3 @@ This project also includes [a sample frontend/Dapp](./frontend), which uses [Cre
   console, try resetting your Metamask account. This will reset the account's
   transaction history and also the nonce. Open Metamask, click on your account
   followed by `Settings > Advanced > Clear activity tab data`.
-
-## Setting up your editor
-
-[Hardhat for Visual Studio Code](https://hardhat.org/hardhat-vscode) is the official Hardhat extension that adds advanced support for Solidity to VSCode. If you use Visual Studio Code, give it a try!
-
-## Getting help and updates
-
-If you need help with this project, or with Hardhat in general, please read [this guide](https://hardhat.org/hardhat-runner/docs/guides/getting-help) to learn where and how to get it.
-
-For the latest news about Hardhat, [follow us on Twitter](https://twitter.com/HardhatHQ), and don't forget to star [our GitHub repository](https://github.com/NomicFoundation/hardhat)!
-
-**Happy _building_!**
