@@ -125,7 +125,7 @@ contract Event is ERC721 {
         
         // Create Ticket t, Store t in tickets array
         tickets.push(Ticket(price, TicketStatus.Valid));
-        uint ticketID = tickets.length - 1;
+        uint256 ticketID = tickets.length - 1;
         numTicketsLeft--;
         
         // store overpaid in balances
@@ -145,7 +145,7 @@ contract Event is ERC721 {
      * @dev Only a valid buyer can mark ticket as used
      * @param ticketID ticket ID of ticket
      */
-    function buyTicketFromUser(uint ticketID) public payable requiredStage(Stages.Active) {
+    function buyTicketFromUser(uint256 ticketID) public payable requiredStage(Stages.Active) {
         // Check if ticket is available for sale
         require(tickets[ticketID].status == TicketStatus.AvailableForSale, "");
 
@@ -175,7 +175,7 @@ contract Event is ERC721 {
      * @dev Only a valid buyer can mark ticket as used
      * @param ticketID ticket ID of ticket
      */
-    function setTicketToUsed(uint ticketID) public requiredStage(Stages.CheckinOpen)
+    function setTicketToUsed(uint256 ticketID) public requiredStage(Stages.CheckinOpen)
                                                                     ownsTicket(ticketID) {
 		// Validate that user has a ticket they own and it is valid
         require(tickets[ticketID].status == TicketStatus.Valid, "");
@@ -196,7 +196,7 @@ contract Event is ERC721 {
      * @param ticketID ticket ID of ticket
      * @param resalePrice resale price for ticket
      */
-    function setTicketForSale(uint ticketID, uint resalePrice) public requiredStage(Stages.Active) ownsTicket(ticketID) {
+    function setTicketForSale(uint256 ticketID, uint resalePrice) public requiredStage(Stages.Active) ownsTicket(ticketID) {
 		// Validate that user has a ticket they own and it is valid
         require(tickets[ticketID].status != TicketStatus.Used, "");
         require(canBeResold == true, "");

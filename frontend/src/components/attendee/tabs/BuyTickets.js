@@ -52,7 +52,8 @@ export class BuyTickets extends React.Component {
     console.log("*** Inside buyTicket");
     try {
       this.props.dismissTransactionError();
-      const tx = await event.contract.buyTicket({ value: ethers.utils.parseEther(event.price.toString()) });
+      const buyTicketValue = ethers.BigNumber.from(event.price.toString());
+      const tx = await event.contract.buyTicket({ value: buyTicketValue });
       this.props.setState({ txBeingSent: tx.hash });
       const receipt = await tx.wait();
 
@@ -98,7 +99,7 @@ export class BuyTickets extends React.Component {
                   >
                     <Text mb={0} pb={1} isTruncated fontWeight="bold" fontSize="xl"> Event: {event.name}</Text>
                     <Text mb={0} pb={1}>Tickets Remaining: {event.numTicketsLeft}</Text>
-                    <Text mb={0} pb={1}>Price: ${event.price.toString()}</Text>
+                    <Text mb={0} pb={1}>Price: ${(event.price / (10 ** 9)).toString()} Gwei</Text>
                     <Text mb={0} pb={1}>Can Be Resold?: {event.canBeResold.toString()}</Text>
                     <Text mb={0} pb={1}>Resale Royalty: {event.royaltyPercent}%</Text>
                     <Button 

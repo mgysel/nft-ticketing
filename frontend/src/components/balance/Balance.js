@@ -91,7 +91,7 @@ export class Balance extends React.Component {
                   width="100%"
                 >
                   <Text pb={0} mb={1} isTruncated fontWeight="bold" fontSize="xl"> Event: {event.name}</Text>
-                  <Text pb={0} mb={1}>Balance: ${event.ownerBalance}</Text>
+                  <Text pb={0} mb={1}>Balance: ${event.ownerBalance * (10 ** 9)} Gwei</Text>
                   <Button 
                     type='submit' 
                     color={this.props.state.darkGreen}

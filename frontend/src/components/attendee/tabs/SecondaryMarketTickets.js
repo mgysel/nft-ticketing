@@ -70,7 +70,8 @@ export class SecondaryMarketTickets extends React.Component {
   async buyTicketFromOwner(event, ticket) {
     try {
       this.props.dismissTransactionError();
-      const tx = await event.contract.buyTicketFromUser(ticket.ticketID);
+      const buyTicketValue = ethers.BigNumber.from(ticket.resalePrice.toString());
+      const tx = await event.contract.buyTicketFromUser(ticket.ticketID, { value: buyTicketValue });
       this.props.setState({ txBeingSent: tx.hash });
       const receipt = await tx.wait();
 
@@ -120,14 +121,10 @@ export class SecondaryMarketTickets extends React.Component {
     console.log("Event: ", event);
     console.log("Ticket: ", ticket);
     try {
-      console.log("0");
       this.props.dismissTransactionError();
-      console.log("1");
       const tx = await event.contract.registerAsBuyer(ticket.ticketID);
-      console.log("TX: ", tx);
       this.props.setState({ txBeingSent: tx.hash });
       const receipt = await tx.wait();
-      console.log("Receipt: ", receipt);
 
       if (receipt.status === 0) {
         throw new Error("Transaction failed");
@@ -172,7 +169,7 @@ export class SecondaryMarketTickets extends React.Component {
                   >
                     <Text pb={0} mb={1} isTruncated fontWeight="bold" fontSize="xl"> Event {event.name}</Text>
                     <Text pb={0} mb={1}>Event: {event.name}</Text>
-                    <Text pb={0} mb={1}>Price: ${ticket.resalePrice}</Text>
+                    <Text pb={0} mb={1}>Price: ${(ticket.resalePrice / (10 ** 9)).toString()} Gwei</Text>
                     <Text pb={0} mb={1}>Ticket ID: {ticket.ticketID}</Text>
                     <Button 
                       type='submit' 

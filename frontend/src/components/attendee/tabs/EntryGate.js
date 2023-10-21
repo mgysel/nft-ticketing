@@ -96,7 +96,7 @@ export class EntryGate extends React.Component {
                         width="100%"
                         onClick={(e) => {
                           e.preventDefault()
-                          this.setTicketToUsed(event, this.props.state.usedTicketID)
+                          this.setTicketToUsed(event, parseInt(this.props.state.usedTicketID))
                         }}
                       >
                         Use Ticket

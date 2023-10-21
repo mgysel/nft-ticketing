@@ -284,7 +284,9 @@ export class Dapp extends React.Component {
       let tickets = [];
       let secondaryTickets = [];
       for (let j=0; j < numTicketsSold; j++) {
+        console.log("J: ", j);
         await thisEvent.tickets(j).then((ticket) => {
+          console.log("TICKET: ", ticket);
           tickets.push({
             "ticketID": j,
             "resalePrice": ticket.resalePrice.toNumber(),

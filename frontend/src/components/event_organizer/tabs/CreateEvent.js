@@ -83,9 +83,14 @@ export class CreateEvent extends React.Component {
   }
   
   async createEvent(numTickets, price, canBeResold, royaltyPercent, name, symbol) {
+    console.log("*** Inside CREATE EVENT");
     try {
       this.props.dismissTransactionError();
-      const tx = await this.props.eventCreator.createEvent(numTickets, price, canBeResold, royaltyPercent, name, symbol);
+      console.log("PRICE: ", parseInt(price));
+      console.log("Price Type: ", typeof price);
+      const gweiPrice = ethers.BigNumber.from(price.toString()).mul(ethers.BigNumber.from(10).pow(9));
+      console.log("GWEI PRICE: ", gweiPrice);
+      const tx = await this.props.eventCreator.createEvent(numTickets, gweiPrice, canBeResold, royaltyPercent, name, symbol);
       this.props.setState({ txBeingSent: tx.hash });
       const receipt = await tx.wait();
 
@@ -172,7 +177,7 @@ export class CreateEvent extends React.Component {
               type='number'
               size="md"
               value={this.state.formPrice}
-              placeholder='Price'
+              placeholder='Price (in Gwei)'
               onChange={(e) => this.setState({ formPrice: e.target.value })}
               mb="10px"
               _placeholder={{ color: 'gray.500' }}
