@@ -1,6 +1,6 @@
 # TicketChain
 
-TicketChain is an NFT event ticketing system that allows event organizers to create events and customers to purchase tickets, all on the Ethereum blockchain. This was originally built for UNSW's Software Architecture for Blockchain-based Applications, but it has since been expanded.
+TicketChain is an NFT event ticketing system that allows event organizers to create events and customers to purchase tickets, all on the Ethereum blockchain. This was originally built for UNSW's Software Architecture for Blockchain-based Applications, but it has since been expanded. The hosted web application on the Ethereum Sepolia Test Network can be viewed [here](https://nft-event-ticketing-0c6fb6610440.herokuapp.com/).
 
 ## Installation and Dependencies
 
@@ -10,7 +10,7 @@ The first things you need to do are cloning this repository and installing its
 dependencies:
 
 ```sh
-git clone https://github.com/NomicFoundation/hardhat-boilerplate.git
+git clone https://github.com/mgysel/nft-ticketing.git
 cd hardhat-boilerplate
 npm install
 ```
@@ -37,7 +37,7 @@ npm start
 ```
 
 Open [http://localhost:3000/](http://localhost:3000/) to see your Dapp. You will
-need to have [Coinbase Wallet](https://www.coinbase.com/wallet) or [Metamask](https://metamask.io) installed and listening to
+need to have [Metamask](https://metamask.io) installed and listening to
 `localhost 8545`.
 
 ### User Guide
