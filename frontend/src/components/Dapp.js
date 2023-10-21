@@ -80,6 +80,7 @@ export class Dapp extends React.Component {
       hasTickets: false,
       hasTicketsEntry: false,
       hasSecondaryTickets: false,
+      hasTicketsUsed: false,
     };
 
     this.state = this.initialState;
@@ -277,32 +278,39 @@ export class Dapp extends React.Component {
       let canBeResold = await thisEvent.canBeResold();
       let royaltyPercent = (await thisEvent.royaltyPercent()).toNumber();
       let stage = await thisEvent.stage();
-      let myTickets = (await thisEvent.balanceOf(this.state.selectedAddress)).toNumber();
+      let myTicketsNum = (await thisEvent.balanceOf(this.state.selectedAddress)).toNumber();
+      let myUsedTicketsNum = 0;
       let numTicketsSold = (await thisEvent.numTickets()).toNumber() - (await thisEvent.numTicketsLeft()).toNumber();
       // Get my/all tickets
       let myTicketsID = [];
       let tickets = [];
+      let myTickets = [];
       let secondaryTickets = [];
       for (let j=0; j < numTicketsSold; j++) {
         console.log("J: ", j);
-        await thisEvent.tickets(j).then((ticket) => {
-          console.log("TICKET: ", ticket);
-          tickets.push({
+        let ticket = await thisEvent.tickets(j);
+        console.log("*** Inside thisEvent.tickets(j)");
+        console.log("TICKET: ", ticket);
+        tickets.push({
+          "ticketID": j,
+          "resalePrice": ticket.resalePrice.toNumber(),
+          "status": ticket.status,
+        });
+        if (ticket.status === 2) {
+          secondaryTickets.push({
             "ticketID": j,
             "resalePrice": ticket.resalePrice.toNumber(),
             "status": ticket.status,
           });
-          if (ticket.status === 2) {
-            secondaryTickets.push({
-              "ticketID": j,
-              "resalePrice": ticket.resalePrice.toNumber(),
-              "status": ticket.status,
-            });
-          }
-        })
-        await thisEvent.ownerOf(j).then(() => {
-          myTicketsID.push(j);
-        })
+          myUsedTicketsNum = myUsedTicketsNum + 1;
+        }
+        let owner = await thisEvent.ownerOf(j);
+        console.log("Owner Of Ticket: ", owner);
+        console.log("Selected Address: ", this.state.selectedAddress);
+        if (owner.toUpperCase() === this.state.selectedAddress.toUpperCase()) {
+          myTicketsID.push(tickets[j].ticketID);
+          myTickets.push(tickets[j]);
+        }
       }
       // Get registered buyers for each ticket 
       for (let j=0; j < tickets.length; j++) {
@@ -310,7 +318,7 @@ export class Dapp extends React.Component {
           tickets[j].registeredBuyers = buyers;
         })
       }
-      if (myTickets > 0) {
+      if (myTicketsNum > 0) {
         this.setState({
           hasTickets: true,
         })
@@ -320,7 +328,7 @@ export class Dapp extends React.Component {
           hasSecondaryTickets: true,
         })
       }
-      if (myTickets > 0 && stage === 2) {
+      if (myTicketsNum > 0 && stage === 2) {
         this.setState({
           hasTicketsEntry: true,
         })
@@ -330,6 +338,11 @@ export class Dapp extends React.Component {
           hasEvents: true,
         })
       } 
+      if (myUsedTicketsNum > 0) {
+        this.setState({
+          hasTicketsUsed: true,
+        })
+      }
 
       // Create event data object
       let thisEventData = {
@@ -345,7 +358,8 @@ export class Dapp extends React.Component {
         "canBeResold": canBeResold,
         "royaltyPercent": royaltyPercent,
         "stage": stage,
-        "myTicketsNum": myTickets,
+        "myTicketsNum": myTicketsNum,
+        "myTickets": myTickets,
         "myTicketsID": myTicketsID,
         "secondaryTickets": secondaryTickets,
         "tickets": tickets,
