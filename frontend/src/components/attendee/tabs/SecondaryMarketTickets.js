@@ -49,24 +49,13 @@ import {
   TabPanel
 } from "@chakra-ui/react";
 
-// This is the default id used by the Hardhat Network
-const HARDHAT_NETWORK_ID = '31337';
-
 // This is an error code that indicates that the user canceled a transaction
 const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 
-// This component is in charge of doing these things:
-//   1. It connects to the user's wallet
-//   2. Initializes ethers and the Token contract
-//   3. Polls the user balance to keep it updated.
-//   4. Transfers tokens by sending transactions
-//   5. Renders the whole application
-//
-// Note that (3) and (4) are specific of this sample application, but they show
-// you how to keep your Dapp and contract's state in sync,  and how to send a
-// transaction.
+// Allows user to view and buy secondary market tickets
 export class SecondaryMarketTickets extends React.Component {  
 
+  // Submits buyTicketFromOwner transaction to event smart contract
   async buyTicketFromOwner(event, ticket) {
     try {
       this.props.dismissTransactionError();
@@ -90,9 +79,8 @@ export class SecondaryMarketTickets extends React.Component {
     }
   }
 
+  // Submits approveAsBuyer transaction to event smart contract
   async approveSale(event, ticket) {
-    console.log("*** Inside ApproveSale")
-    
     try {
       this.props.dismissTransactionError();
       // const tx = await event.contract.getRegisteredBuyer(ticket.ticketID);
@@ -116,10 +104,8 @@ export class SecondaryMarketTickets extends React.Component {
     }
   }
 
+  // Submits registerToBuy transaction to event smart contract
   async registerToBuy(event, ticket) {
-    console.log("*** Inside registerToBuy");
-    console.log("Event: ", event);
-    console.log("Ticket: ", ticket);
     try {
       this.props.dismissTransactionError();
       const tx = await event.contract.registerAsBuyer(ticket.ticketID);
@@ -133,7 +119,6 @@ export class SecondaryMarketTickets extends React.Component {
       await this.props.getEventsData();
     } catch (error) {
       if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
-        console.log("ERROR: ", error);
         return;
       }
       this.props.setState({ transactionError: error });

@@ -1,21 +1,11 @@
 import React from "react";
 
-// We'll use ethers to interact with the Ethereum network and our contract
-import { ethers } from "ethers";
-
-// We import the contract's artifacts and address here, as we are going to be
-// using them with ethers
-import EventArtifact from "../../contracts/Event.json";
-import EventCreatorArtifact from "../../contracts/EventCreator.json";
-import contractAddress from "../../contracts/contract-address.json";
-
 // All the logic of this dapp is contained in the Dapp component.
 // These other components are just presentational ones: they don't have any
 // logic. They just render HTML.
 import { BuyTickets } from "./tabs/BuyTickets";
 import { SecondaryMarketTickets } from "./tabs/SecondaryMarketTickets";
 import { MyTickets } from "./tabs/MyTickets";
-import { EntryGate } from "./tabs/EntryGate";
 
 import {
   Tabs,
@@ -24,6 +14,7 @@ import {
   Tab,
 } from "@chakra-ui/react";
 
+// Attendee homepage that allows attendee to buy, sell, and use tickets
 export class Attendee extends React.Component {  
   constructor(props) {
     super(props);

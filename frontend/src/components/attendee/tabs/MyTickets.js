@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 // These other components are just presentational ones: they don't have any
 // logic. They just render HTML.
 import { EmptyMessage } from "../../error_handling/EmptyMessage";
+import { Ticket } from "./tickets/Ticket.js";
 
 import { ethers } from "ethers";
 
@@ -20,35 +21,19 @@ import {
 // This is an error code that indicates that the user canceled a transaction
 const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 
+// Allows user to view, resell, and use event tickets
 export class MyTickets extends React.Component {  
   constructor(props) {
     super(props);
 
-    // this.props.updateBalance();
-    // this.props.getEventsData();
     this.state = {
       resaleTicketPrice: "",
+      ticketsID: 0,
     }
-    console.log("Inside MyTickets constructor");
-    console.log("THIS PROPS: ", this.props);
-  }
-
-  hasTickets = () => {
-    // Determine number of secondary market tickets
-    var hasTickets = false;
-    for (var i = 0; i < this.props.state.events.length; i++) {
-      if (this.props.state.events[i].myTicketsNum > 0) {
-        hasTickets = true;
-        break;
-      }
-    }
-
-    return hasTickets;
   }
   
+  // Submits setTicketForSale transaction to event smart contract
   async setTicketForSale(event, ticketId, resalePrice) {
-    console.log("*** Inside setTicketForSale");
-    console.log("Resale Price: ", resalePrice);
     try {
       this.props.dismissTransactionError();
       const gweiPrice = ethers.BigNumber.from(resalePrice.toString()).mul(ethers.BigNumber.from(10).pow(9));
@@ -72,8 +57,8 @@ export class MyTickets extends React.Component {
     }
   }
 
+  // Submits setTicketToUsed transaction to event smart contract
   async setTicketToUsed(event, ticketID) {
-    console.log("*** setTicketToUsed ***");
     try {
       this.props.dismissTransactionError();
       const tx = await event.contract.setTicketToUsed(ticketID);
@@ -100,84 +85,29 @@ export class MyTickets extends React.Component {
     <TabPanel mt="15px" mb="15px" align="center">
     <Heading mb="25px">Upcoming Events</Heading>
     {
-      !this.props.state.hasTickets && (
+      !this.props.state.hasTicketsUnused && (
         <EmptyMessage message={`You don't have any tickets.\n Purchase tickets to have fun at our events!`} />
       )
     }
 
-    { this.props.state.hasTickets &&
+    { this.props.state.hasTicketsUnused &&
       <SimpleGrid columns={3} spacing={5} mt="30px">
         { 
           this.props.state.events.map((event, indexEvent) => (
             event.myTickets.map((ticket, indexTicket) => (
-            <Box 
-              key={indexEvent}
-              borderRadius="5px"
-              border="1px solid"
-              borderColor="gray.200"
-              p="20px"
-              width="100%"
-            >
-              <Text pb={0} mb={1} isTruncated fontWeight="bold" fontSize="xl">Ticket for {event.name}</Text>
-              <Text pb={0} mb={1} >Ticket ID: {ticket.ticketID}</Text>
-              <Box
-                borderRadius="5px"
-                border="1px solid"
-                borderColor="gray.100"
-                padding="10px"
-                mt="10px"
-              >
-                { event.stage === 1 && 
-                  <form>
-                    <Input
-                      isRequired
-                      id='resalePrice'
-                      type='number'
-                      size="md"
-                      placeholder='Set Resale Price'
-                      value = {this.state.resaleTicketPrice}
-                      onChange={(e) => this.setState({resaleTicketPrice: e.target.value})}
-                      mb="0px"
-                      mt="10px"
-                      _placeholder={{ color: 'gray.500' }}
-                    />
-                    <Button 
-                      type='submit' 
-                      color={this.props.state.darkGreen}
-                      backgroundColor={this.props.state.lightGreen}
-                      size="lg"
-                      mt="10px"
-                      width="100%"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        this.setTicketForSale(event, ticket.ticketID, this.state.resaleTicketPrice);
-                        this.setState({resaleTicketPrice: ""});
-                      }}
-                    >
-                      Set Ticket For Sale
-                    </Button>
-                  </form>
-                }
-                { event.stage === 2 && ticket.status !== 1 &&
-                  <form>
-                  <Button 
-                    type='submit' 
-                    color={this.props.state.darkGreen}
-                    backgroundColor={this.props.state.lightGreen}
-                    size="lg"
-                    mt="10px"
-                    width="100%"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      this.setTicketToUsed(event, ticket.ticketID)
-                    }}
-                  >
-                    Use Ticket
-                  </Button>
-                </form>
-                }
-              </Box>
-            </Box>
+              ticket.status !== 1 &&
+              <Ticket 
+                indexEvent={indexEvent}
+                indexTicket={indexTicket}
+                event={event}
+                ticket={ticket}
+                state={this.props.state}
+                setState={this.props.setState}
+                dismissTransactionError={this.props.dismissTransactionError}
+                eventCreator={this.props.eventCreator}
+                updateBalance={this.props.updateBalance}
+                getEventsData={this.props.getEventsData}
+              />
             ))
           ))
       
@@ -187,27 +117,27 @@ export class MyTickets extends React.Component {
 
     <Heading mt='25px'>Used Tickets</Heading>
     {
-      !this.props.state.hasUsedTickets && (
+      !this.props.state.hasTicketsUsed && (
         <EmptyMessage message={`You haven't used any tickets.\n Purchase/use tickets to have fun at our events!`} />
       )
     }
     
-    { this.props.state.hasUsedTickets &&
+    { this.props.state.hasTicketsUsed &&
       <SimpleGrid columns={3} spacing={5} mt="30px">
         { 
           this.props.state.events.map((event, indexEvent) => (
-            event.stage === 4 && event.usedTickets.map((ticket, indexTicket) => (
-            <Box 
-              key={indexEvent}
-              borderRadius="5px"
-              border="1px solid"
-              borderColor="gray.200"
-              p="20px"
-              width="100%"
-            >
-              <Text pb={0} mb={1} isTruncated fontWeight="bold" fontSize="xl">Ticket for {event.name}</Text>
-              <Text pb={0} mb={1} >Ticket ID: {ticket.ticketID}</Text>
-            </Box>
+            event.myTickets.map((ticket, indexTicket) => (
+              ticket.status === 1 && 
+              <Box 
+                borderRadius="5px"
+                border="1px solid"
+                borderColor="gray.200"
+                p="20px"
+                width="100%"
+              >
+                <Text pb={0} mb={1} isTruncated fontWeight="bold" fontSize="xl">Ticket for {event.name}</Text>
+                <Text pb={0} mb={1} >Ticket ID: {ticket.ticketID}</Text>
+              </Box>
             ))
           ))
       

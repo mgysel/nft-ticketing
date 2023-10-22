@@ -14,24 +14,13 @@ import {
 // This is an error code that indicates that the user canceled a transaction
 const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 
+// ALlows user to view and withdraw balance
 export class Balance extends React.Component {  
   constructor(props) {
     super(props);
 
     this.props.updateBalance();
     this.props.getEventsData();
-    
-    // Determine if owner has created any events
-    var hasBalance = false;
-    for (var i = 0; i < this.props.state.events.length; i++) {
-      if (this.props.state.events[i].userBalance > 0) {
-        hasBalance = true;
-        break;
-      }
-    }
-    this.state = {
-      hasBalance: hasBalance,
-    }
   }
 
   async withdraw(event) {
@@ -53,6 +42,7 @@ export class Balance extends React.Component {
       this.props.setState({ transactionError: error });
     } finally {
       this.props.setState({ txBeingSent: undefined });
+      this.props.getEventsData();
     }
   }
 
@@ -72,12 +62,12 @@ export class Balance extends React.Component {
         <Heading mt='15px' mb="15px">Withdraw Balance from Events</Heading>
       </Center>
       {
-        !this.state.hasBalance && (
-          <EmptyMessage message={`You have no balance to withdraw. Sell primary or secondary market tickets to withdraw a balance.`} />
+        !this.props.state.hasBalance && (
+          <EmptyMessage message={`You have no balance to withdraw. Sell primary or secondary market tickets to withdraw a balance. Note that an event must be Closed for an event organizer to withdraw their balance`} />
         )
       }
 
-      { this.state.hasBalance &&
+      { this.props.state.hasBalance &&
         <SimpleGrid columns={3} spacing={5} mt="30px">
           { 
             this.props.state.events.map((event, index) => (
@@ -91,7 +81,7 @@ export class Balance extends React.Component {
                   width="100%"
                 >
                   <Text pb={0} mb={1} isTruncated fontWeight="bold" fontSize="xl"> Event: {event.name}</Text>
-                  <Text pb={0} mb={1}>Balance: ${event.ownerBalance * (10 ** 9)} Gwei</Text>
+                  <Text pb={0} mb={1}>Balance: ${event.userBalance * (10 ** 9)} Gwei</Text>
                   <Button 
                     type='submit' 
                     color={this.props.state.darkGreen}

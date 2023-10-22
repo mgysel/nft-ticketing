@@ -14,9 +14,6 @@ import contractAddress from "../contracts/contract-address.json";
 // logic. They just render HTML.
 import { NoWalletDetected } from "./error_handling/NoWalletDetected";
 import { ConnectWallet } from "./error_handling/ConnectWallet";
-import { Loading } from "./error_handling/Loading";
-import { TransactionErrorMessage } from "./error_handling/TransactionErrorMessage";
-import { WaitingForTransactionMessage } from "./error_handling/WaitingForTransactionMessage";
 import { Navbar } from "./navbar/Navbar";
 
 // Routes
@@ -75,12 +72,14 @@ export class Dapp extends React.Component {
       darkGreen: "#276749",
       lightGreen: "#C6F6DF",
       navLinkHoverColor: 'gray.400',
-      // Tickets
+      // Events/Tickets
       hasEvents: false,
       hasTickets: false,
       hasTicketsEntry: false,
       hasSecondaryTickets: false,
       hasTicketsUsed: false,
+      hasTicketsUnused: false,
+      hasBalance: false,
     };
 
     this.state = this.initialState;
@@ -90,34 +89,6 @@ export class Dapp extends React.Component {
   }
 
   render() {
-    // Ethereum wallets inject the window.ethereum object. If it hasn't been
-    // injected, we instruct the user to install a wallet.
-    if (window.ethereum === undefined) {
-      return <NoWalletDetected />;
-    }
-
-    // The next thing we need to do, is to ask the user to connect their wallet.
-    // When the wallet gets connected, we are going to save the users's address
-    // in the component's state. So, if it hasn't been saved yet, we have
-    // to show the ConnectWallet component.
-    //
-    // Note that we pass it a callback that is going to be called when the user
-    // clicks a button. This callback just calls the _connectWallet method.
-    if (!this.state.selectedAddress) {
-      return (
-        <ConnectWallet 
-          connectWallet={() => this._connectWallet()} 
-          networkError={this.state.networkError}
-          dismiss={() => this._dismissNetworkError()}
-        />
-      );
-    }
-
-    // If the token data or the user's balance hasn't loaded yet, we show
-    // a loading component.
-    if (!this.state.balance) {
-      return <Loading />;
-    }
 
     // If everything is loaded, we render the application.
     return (
@@ -129,6 +100,20 @@ export class Dapp extends React.Component {
             direction="column"
           >
             <Navbar state={this.state} setState={this.setState} />
+            {
+              window.ethereum === undefined && (
+                <NoWalletDetected />
+              )
+            }
+            {
+              window.ethereum !== undefined && !this.state.selectedAddress && (
+                <ConnectWallet 
+                connectWallet={() => this._connectWallet()} 
+                networkError={this.state.networkError}
+                dismiss={() => this._dismissNetworkError()}
+                />
+              )
+            }
             <Routes>
               <Route path="/" element={
                 <Attendee
@@ -174,7 +159,6 @@ export class Dapp extends React.Component {
   }
 
   async _connectWallet() {
-    console.log("*** Inside connectWallet")
     // This method is run when the user clicks the Connect. It connects the
     // dapp to the user's wallet, and initializes it.
 
@@ -207,40 +191,22 @@ export class Dapp extends React.Component {
   async _initialize(userAddress) {
     // This method initializes the dapp
 
-    // We first store the user's address in the component's state
-    console.log("*** Inside initialize");
-    console.log("User address: ", userAddress);
-    console.log("Selected Address BEFORE: ", this.state.selectedAddress);
-
     this.setState({ 
       selectedAddress: userAddress,
       provider: new ethers.providers.Web3Provider(window.ethereum),
     }, function() {
-      console.log("Selected Address AFTER: ", this.state.selectedAddress);
       this.initializeEthers();
       this.updateBalance();
       this.getEventsData();
       // this._startPollingData();
     });
-
-    // Then, we initialize ethers, fetch the token's data, and start polling
-    // for the user's balance.
-
-    // Fetching the token data and the user's balance are specific to this
-    // sample project, but you can reuse the same initialization pattern.
-    // await this.initializeEthers();
-    // await this.updateBalance();
-    // await this.getEventsData();
-    // this._startPollingData();
   }
 
   async initializeEthers() {
     // We first initialize ethers by creating a provider using window.ethereum
-    console.log("*** Inside initializeEthers")
 
     // Initialize the Event Creator contract
     this.eventCreator = new ethers.Contract(
-      // TODO: How to get Event Creator address
       contractAddress.EventCreator,
       EventCreatorArtifact.abi,
       this.state.provider.getSigner(0)
@@ -250,15 +216,20 @@ export class Dapp extends React.Component {
   // The next two methods just read from the contract and store the results
   // in the component state.
   async updateBalance() {
-    console.log("*** Inside updateBalance");
     const balance = ethers.utils.formatEther(await this.state.provider.getBalance(this.state.selectedAddress));
     this.setState({ balance: balance });
   }
 
   async getEventsData() {
-    console.log("*** Inside getEventsData");
     const events = await this.eventCreator.getEvents();
     const eventsData = [];
+    let thisHasEvents = false;
+    let thisHasTickets = false;
+    let thisHasTicketsEntry = false;
+    let thisHasSecondaryTickets = false;
+    let thisHasTicketsUsed = false;
+    let thisHasTicketsUnused = false;
+    let thisHasBalance = false;
     for (let i=0; i < events.length; i++) {
       // Upload event contract
       const thisEvent = new ethers.Contract(
@@ -288,10 +259,7 @@ export class Dapp extends React.Component {
       let secondaryTickets = [];
       let usedTickets = [];
       for (let j=0; j < numTicketsSold; j++) {
-        console.log("J: ", j);
         let ticket = await thisEvent.tickets(j);
-        console.log("*** Inside thisEvent.tickets(j)");
-        console.log("TICKET: ", ticket);
         tickets.push({
           "ticketID": j,
           "resalePrice": ticket.resalePrice.toNumber(),
@@ -311,8 +279,6 @@ export class Dapp extends React.Component {
           });
         }
         let owner = await thisEvent.ownerOf(j);
-        console.log("Owner Of Ticket: ", owner);
-        console.log("Selected Address: ", this.state.selectedAddress);
         if (owner.toUpperCase() === this.state.selectedAddress.toUpperCase()) {
           myTicketsID.push(tickets[j].ticketID);
           myTickets.push(tickets[j]);
@@ -325,29 +291,25 @@ export class Dapp extends React.Component {
         })
       }
       if (myTicketsNum > 0) {
-        this.setState({
-          hasTickets: true,
-        })
+        thisHasTickets = true;
       }
       if (secondaryTickets.length > 0) {
-        this.setState({
-          hasSecondaryTickets: true,
-        })
-      }
-      if (myTicketsNum > 0 && stage === 2) {
-        this.setState({
-          hasTicketsEntry: true,
-        })
-      }
-      if (owner.toLowerCase() === this.state.selectedAddress.toLowerCase()) {
-        this.setState({
-          hasEvents: true,
-        })
+        thisHasSecondaryTickets = true;
       } 
+      if (myTicketsNum > 0 && stage === 2) {
+        thisHasTicketsEntry = true;
+      } 
+      if (owner.toLowerCase() === this.state.selectedAddress.toLowerCase()) {
+        thisHasEvents = true;
+      }
       if (usedTickets.length > 0) {
-        this.setState({
-          hasTicketsUsed: true,
-        })
+        thisHasTicketsUsed = true;
+      } 
+      if (myTicketsNum - usedTickets.length > 0) {
+        thisHasTicketsUnused = true;
+      }
+      if (userBalance > 0) {
+        thisHasBalance = true;
       }
 
       // Create event data object
@@ -373,12 +335,16 @@ export class Dapp extends React.Component {
       eventsData.push(thisEventData);
     }
 
-    // Determine if user has tickets
-
-
+    // Set variables
     console.log("EVENTS DATA: ", eventsData);
     this.setState({events: eventsData});
-    console.log("STATE EVENTS DATA: ", this.state.events)
+    this.setState({hasEvents: thisHasEvents});
+    this.setState({hasTickets: thisHasTickets});
+    this.setState({hasTicketsEntry: thisHasTicketsEntry});
+    this.setState({hasSecondaryTickets: thisHasSecondaryTickets});
+    this.setState({hasTicketsUsed: thisHasTicketsUsed});
+    this.setState({hasTicketsUnused: thisHasTicketsUnused});
+    this.setState({hasBalance: thisHasBalance});
   }
 
 

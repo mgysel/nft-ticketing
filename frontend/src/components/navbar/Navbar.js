@@ -25,7 +25,6 @@ export class Navbar extends React.Component {
     const color2 = 'gray.400';
     const urlList = window.location.href.split('/');
     const url = urlList[urlList.length - 1];
-    console.log("NAVBAR URL: ", url);
     if (url === '') {
       this.state = {
         bgColor1: color2,
@@ -51,10 +50,6 @@ export class Navbar extends React.Component {
         bgColor3: color1,
       }
     }
-
-
-    console.log("PROPS: ", props);
-    console.log("STATE: ", this.state);
   }
 
   // If everything is loaded, we render the application.

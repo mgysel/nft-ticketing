@@ -17,18 +17,10 @@ import {
 // This is an error code that indicates that the user canceled a transaction
 const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 
-// This component is in charge of doing these things:
-//   1. It connects to the user's wallet
-//   2. Initializes ethers and the Token contract
-//   3. Polls the user balance to keep it updated.
-//   4. Transfers tokens by sending transactions
-//   5. Renders the whole application
-//
-// Note that (3) and (4) are specific of this sample application, but they show
-// you how to keep your Dapp and contract's state in sync,  and how to send a
-// transaction.
+// List of my events, or the events created by this Wallet
 export class MyEvents extends React.Component {  
 
+  // Submits setStage transaction to event smart contract
   async setEventStage(event, stage) {
     try {
       this.props.dismissTransactionError();
@@ -51,7 +43,6 @@ export class MyEvents extends React.Component {
     }
   }
 
-  // If everything is loaded, we render the application.
   render() {
   return (
     <TabPanel mt="15px" mb="15px" align="center">
